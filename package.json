@@ -1,16 +1,17 @@
 {
-  "name": "h-project",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "author": "",
-  "license": "ISC",
-  "dependencies": {
-    "fastify": "^4.7.0",
-    "mongoose": "^6.6.5",
-    "nodemon": "^2.0.20"
-  }
+	"name": "h-project",
+	"version": "1.0.0",
+	"description": "",
+	"main": "index.js",
+	"scripts": {
+		"start": "node app.js",
+		"dev": "nodemon app.js"
+	},
+	"author": "",
+	"license": "ISC",
+	"dependencies": {
+		"fastify": "^4.7.0",
+		"mongoose": "^6.6.5",
+		"nodemon": "^2.0.20"
+	}
 }
