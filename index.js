@@ -1,7 +1,13 @@
 const fastify = require("fastify")({ logger: true });
+const cors = require("@fastify/cors");
 
 const PORT = process.env.PORT || 3000;
-const HOST = "localhost"; //"0.0.0.0";
+const HOST = "0.0.0.0"; //"localhost";
+
+await fastify.register(cors, {
+  // put your options here
+  origin: true,
+});
 
 fastify.register(require("./plugins/mongoose.js"));
 fastify.register(require("./routes/dev_routes.js"));
