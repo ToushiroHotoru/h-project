@@ -5,8 +5,6 @@ const HOST = "0.0.0.0";
 
 fastify.register(require("./routes/dev_routes.js"));
 
-// Declare a route
-
 
 // Run the server!
 const start = async () => {
