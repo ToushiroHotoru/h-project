@@ -4,7 +4,7 @@ const cors = require("@fastify/cors");
 const PORT = process.env.PORT || 3000;
 const HOST = "0.0.0.0"; //"localhost";
 
-await fastify.register(cors, {
+fastify.register(cors, {
   // put your options here
   origin: true,
 });
