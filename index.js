@@ -3,6 +3,7 @@ const cors = require("@fastify/cors");
 
 const PORT = process.env.PORT || 8080;
 const HOST = "0.0.0.0"; //"localhost";
+// const HOST = "localhost"; //"localhost";
 
 fastify.register(cors, {
   // put your options here
