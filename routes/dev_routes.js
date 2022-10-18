@@ -41,8 +41,21 @@ async function routes(fastify, options) {
   });
 
   fastify.get("/mangas", async (request, reply) => {
-    const mangas = await Manga.find({});
-    reply.code(200).send(mangas);
+    try {
+      const mangas = await Manga.find({});
+      reply.code(200).send(mangas);
+    } catch (err) {
+      console.log(err);
+    }
+  });
+
+  fastify.post("/manga", async (request, reply) => {
+    try {
+      const manga = await Manga.find({ _id: request.body.id });
+      reply.code(200).send(manga);
+    } catch (err) {
+      console.log(err);
+    }
   });
 }
 

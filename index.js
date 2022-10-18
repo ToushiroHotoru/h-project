@@ -1,7 +1,7 @@
 const fastify = require("fastify")({ logger: true });
 const cors = require("@fastify/cors");
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 8080;
 const HOST = "0.0.0.0"; //"localhost";
 
 fastify.register(cors, {
