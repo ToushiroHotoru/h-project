@@ -30,7 +30,18 @@ async function routes(fastify, options) {
       //   for (let i = 0; i < 2; i++) {
       await Manga.add(request.body);
       //   }
-      reply.code(200).send({ status: "success" });
+      reply.code(200).send({ msg: "manga was written" });
+    } catch (err) {
+      console.log(`New user error - ${chalk.red(err)}`);
+    }
+  });
+
+  fastify.delete("/delete", async (request, reply) => {
+    try {
+      console.log("id", request.body.id);
+      const { id } = request.body;
+      await Manga.deleteOne({ _id: id });
+      reply.code(200).send({ msg: "manga was deleted" });
     } catch (err) {
       console.log(`New user error - ${chalk.red(err)}`);
     }
@@ -39,11 +50,14 @@ async function routes(fastify, options) {
   fastify.get("/mangas", async (request, reply) => {
     try {
       const { page } = request.query;
-      const offset = 8 * page;
+      const step = 8;
+      const offset = step * page;
       const total = await Manga.count();
       console.log(page);
       const mangas = await Manga.find({}).skip(offset).limit(8);
-      reply.code(200).send({ total: total, mangas: mangas });
+      reply
+        .code(200)
+        .send({ total: total, offset: offset, step: step, mangas: mangas });
     } catch (err) {
       console.log(err);
     }
