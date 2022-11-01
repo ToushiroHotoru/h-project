@@ -49,12 +49,33 @@ async function routes(fastify, options) {
 
   fastify.get("/mangas", async (request, reply) => {
     try {
-      const { page } = request.query;
+      const { page, sort } = request.query;
       const step = 8;
       const offset = step * page;
       const total = await Manga.count();
-      console.log(page);
-      const mangas = await Manga.find({}).skip(offset).limit(8);
+      let mangas = null;
+
+      switch (sort) {
+        case "latest":
+          mangas = await Manga.find({})
+            .sort({ createdAt: "desc" })
+            .skip(offset)
+            .limit(step);
+          break;
+        case "alphabet":
+          mangas = await Manga.find({})
+            .collation({ locale: "en", strength: 2 })
+            .sort({ title: 1 })
+            .skip(offset)
+            .limit(step);
+          break;
+        default:
+          mangas = await Manga.find({})
+            .sort({ createdAt: "desc" })
+            .skip(offset)
+            .limit(step);
+      }
+
       reply
         .code(200)
         .send({ total: total, offset: offset, step: step, mangas: mangas });
