@@ -80,7 +80,7 @@ async function routes(fastify, options) {
         .code(200)
         .send({ total: total, offset: offset, step: step, mangas: mangas });
     } catch (err) {
-      console.log(err);
+      console.log(`New user error - ${chalk.red(err)}`);
     }
   });
 
@@ -90,16 +90,33 @@ async function routes(fastify, options) {
       const mangas = await Manga.find({}).select("_id");
       reply.code(200).send(mangas);
     } catch (err) {
-      console.log(err);
+      console.log(`New user error - ${chalk.red(err)}`);
     }
   });
 
-  fastify.post("/manga", async (request, reply) => {
+  fastify.post("/manga-static", async (request, reply) => {
     try {
-      const manga = await Manga.findById(request.body.id);
+      const manga = await Manga.findById(request.body.id).select([
+        "title",
+        "artist",
+        "cycle",
+      ]);
       reply.code(200).send(manga);
     } catch (err) {
-      console.log(err);
+      console.log(`New user error - ${chalk.red(err)}`);
+    }
+  });
+
+  fastify.post("/manga-dynamic", async (request, reply) => {
+    try {
+      const manga = await Manga.findById(request.body.id).select([
+        "-title",
+        "-artist",
+        "-cycle",
+      ]);
+      reply.code(200).send(manga);
+    } catch (err) {
+      console.log(`New user error - ${chalk.red(err)}`);
     }
   });
 }
