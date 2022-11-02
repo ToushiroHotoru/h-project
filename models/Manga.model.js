@@ -13,6 +13,7 @@ const MangaSchema = new Schema(
       name: { type: String },
       part: { type: Number },
     },
+    pages: { type: Array, required: true },
   },
   { timestamps: true }
 );
