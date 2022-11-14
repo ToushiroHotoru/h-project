@@ -2,18 +2,44 @@ const chalk = require("chalk");
 const User = require("../models/User.model");
 const Manga = require("../models/Manga.model");
 
-const mangas = {
-  title: "Title",
-  cover: "Cover",
-  artist: "Artist",
-  series: "Series",
-  tags: ["Simple", "Simple", "Simple", "Simple", "Simple", "Simple"],
-  likes: 0,
-  views: 0,
+const manga_template = {
+  title: "Manga 7",
+  cover: "/manga_cover/cover_7.jpg",
+  artist: "Toushiro",
+  series: "Toushiro's saga",
+  tags: ["pagination", "lero"],
+  likes: 999,
+  views: 9999,
   cycle: {
-    name: "CycleName",
+    name: "Neverland",
     part: 1,
   },
+  pages: [
+    "/test_manga_storage/1.jpg",
+    "/test_manga_storage/2.jpg",
+    "/test_manga_storage/3.jpg",
+    "/test_manga_storage/4.jpg",
+    "/test_manga_storage/5.jpg",
+    "/test_manga_storage/6.jpg",
+    "/test_manga_storage/7.jpg",
+    "/test_manga_storage/8.jpg",
+    "/test_manga_storage/9.jpg",
+    "/test_manga_storage/10.jpg",
+    "/test_manga_storage/11.jpg",
+    "/test_manga_storage/12.jpg",
+    "/test_manga_storage/13.jpg",
+    "/test_manga_storage/14.jpg",
+    "/test_manga_storage/15.jpg",
+    "/test_manga_storage/16.jpg",
+    "/test_manga_storage/17.jpg",
+    "/test_manga_storage/18.jpg",
+    "/test_manga_storage/19.jpg",
+    "/test_manga_storage/20.jpg",
+    "/test_manga_storage/21.jpg",
+    "/test_manga_storage/22.jpg",
+    "/test_manga_storage/23.jpg",
+    "/test_manga_storage/24.jpg",
+  ],
 };
 
 async function routes(fastify, options) {
@@ -23,6 +49,59 @@ async function routes(fastify, options) {
 
   fastify.get("/test", async (request, reply) => {
     reply.send({ hello: "world" });
+  });
+
+  function getRandomInt(max) {
+    return Math.floor(Math.random() * max);
+  }
+
+  fastify.post("/write-many", async (request, reply) => {
+    try {
+      for (let i = 0; i < 72; i++) {
+        await Manga.add({
+          title: `Manga ${i + 1}`,
+          cover: `/manga_cover/cover_${getRandomInt(7) + 1}.jpg`,
+          artist: "Toushiro",
+          series: "Toushiro's saga",
+          tags: ["pagination", "lero"],
+          likes: 999,
+          views: 9999,
+          cycle: {
+            name: "Neverland",
+            part: 1,
+          },
+          pages: [
+            "/test_manga_storage/1.jpg",
+            "/test_manga_storage/2.jpg",
+            "/test_manga_storage/3.jpg",
+            "/test_manga_storage/4.jpg",
+            "/test_manga_storage/5.jpg",
+            "/test_manga_storage/6.jpg",
+            "/test_manga_storage/7.jpg",
+            "/test_manga_storage/8.jpg",
+            "/test_manga_storage/9.jpg",
+            "/test_manga_storage/10.jpg",
+            "/test_manga_storage/11.jpg",
+            "/test_manga_storage/12.jpg",
+            "/test_manga_storage/13.jpg",
+            "/test_manga_storage/14.jpg",
+            "/test_manga_storage/15.jpg",
+            "/test_manga_storage/16.jpg",
+            "/test_manga_storage/17.jpg",
+            "/test_manga_storage/18.jpg",
+            "/test_manga_storage/19.jpg",
+            "/test_manga_storage/20.jpg",
+            "/test_manga_storage/21.jpg",
+            "/test_manga_storage/22.jpg",
+            "/test_manga_storage/23.jpg",
+            "/test_manga_storage/24.jpg",
+          ],
+        });
+      }
+      reply.code(200).send({ msg: "72 records created" });
+    } catch (err) {
+      console.log(`New user error - ${chalk.red(err)}`);
+    }
   });
 
   fastify.post("/write", async (request, reply) => {
@@ -40,7 +119,7 @@ async function routes(fastify, options) {
     try {
       console.log("id", request.body.id);
       const { id } = request.body;
-      await Manga.deleteOne({ _id: id });
+      await Manga.deleteMany({});
       reply.code(200).send({ msg: "manga was deleted" });
     } catch (err) {
       console.log(`New user error - ${chalk.red(err)}`);
@@ -50,10 +129,14 @@ async function routes(fastify, options) {
   fastify.get("/mangas", async (request, reply) => {
     try {
       const { page, sort } = request.query;
-      const step = 8;
+      const step = 24;
       const offset = step * page;
       const total = await Manga.count();
       let mangas = null;
+
+      if (page < 0 || page > total / 24) {
+        reply.status(500).send({ message: "задана не верная страница" });
+      }
 
       switch (sort) {
         case "latest":
@@ -70,10 +153,11 @@ async function routes(fastify, options) {
             .limit(step);
           break;
         default:
-          mangas = await Manga.find({})
-            .sort({ createdAt: "desc" })
-            .skip(offset)
-            .limit(step);
+          reply.status(500).send({ message: "такого типа сортировки нет" });
+        // mangas = await Manga.find({})
+        //   .sort({ createdAt: "desc" })
+        //   .skip(offset)
+        //   .limit(step);
       }
 
       reply
