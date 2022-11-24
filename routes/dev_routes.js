@@ -146,7 +146,7 @@ async function routes(fastify, options) {
       const total = await Manga.count();
       let mangas = null;
 
-      if (reg.test(page) || page - 1 < 0 || page - 1 > total / 24) {
+      if (!reg.test(page) || page - 1 < 0 || page - 1 > total / 24) {
         reply.status(500).send({ message: "задана не верная страница" });
       }
 
