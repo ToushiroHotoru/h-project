@@ -140,7 +140,7 @@ async function routes(fastify, options) {
   fastify.get("/mangas", async (request, reply) => {
     try {
       const { page, sort } = request.query;
-      const reg = new RegExp("^d+$");
+      const reg = new RegExp("^[0-9]+$");
       const step = 24;
       const offset = step * (page - 1);
       const total = await Manga.count();
