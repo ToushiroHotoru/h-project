@@ -115,7 +115,18 @@ async function routes(fastify, options) {
     }
   });
 
-  fastify.delete("/delete", async (request, reply) => {
+  fastify.delete("/delete-one", async (request, reply) => {
+    try {
+      console.log("id", request.body.id);
+      const { id } = request.body;
+      await Manga.deleteOne({ _id: id });
+      reply.code(200).send({ msg: "manga was deleted" });
+    } catch (err) {
+      console.log(`New user error - ${chalk.red(err)}`);
+    }
+  });
+
+  fastify.delete("/delete-many", async (request, reply) => {
     try {
       console.log("id", request.body.id);
       const { id } = request.body;
@@ -129,12 +140,13 @@ async function routes(fastify, options) {
   fastify.get("/mangas", async (request, reply) => {
     try {
       const { page, sort } = request.query;
+      const reg = new RegExp("^d+$");
       const step = 24;
-      const offset = step * page;
+      const offset = step * (page - 1);
       const total = await Manga.count();
       let mangas = null;
 
-      if (page < 0 || page > total / 24) {
+      if (reg.test(page) || page - 1 < 0 || page - 1 > total / 24) {
         reply.status(500).send({ message: "задана не верная страница" });
       }
 
