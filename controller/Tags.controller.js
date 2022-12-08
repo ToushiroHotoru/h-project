@@ -1,5 +1,5 @@
 const chalk = require("chalk");
-const Tags = require("../models/Tags.modal");
+const Tags = require("../models/Tags.model");
 
 
 class TagsController{
