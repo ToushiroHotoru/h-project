@@ -10,12 +10,12 @@ const getAllMangas = async (request, reply) => {
 		const offset = step * (page - 1);
 		const total = await Manga.count();
 		let mangas = null;
-
+    
 		if (!reg.test(page) || page - 1 < 0 || page - 1 > total / 24) {
 			reply.status(500).send({ message: 'задана не верная страница' });
 		}
 
-		mangas = MangaService.mangaSort(sort, offset, step);
+		mangas = await MangaService.mangaSort(sort, offset, step);
 
 		reply.code(200).send({ total, offset, step, mangas });
 	} catch (err) {
