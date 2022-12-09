@@ -1,5 +1,5 @@
-const chalk = require("chalk");
 const Tags = require("../models/Tags.model");
+const os = require("os");
 
 class TagsController {
   async addTags(request, reply) {
@@ -11,8 +11,18 @@ class TagsController {
   }
 
   async deleteTags(request, reply) {
-    const tag = await Tags.deleteAll();
-    reply.code(200).send({ tag });
+    const tags = await Tags.deleteAll();
+    reply.code(200).send({ tags });
+  }
+
+  async getAllTags(request, reply) {
+    let tags = await Tags.getAll();
+    tags = tags.map((tag) => {
+      tag.image = "http://localhost:8080" + tag.image;
+      tag.miniImage = "http://localhost:8080" + tag.miniImage;
+      return tag;
+    });
+    reply.code(200).send({ tags });
   }
 }
 
