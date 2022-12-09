@@ -15,26 +15,36 @@ const tagsSchema = new Schema({
   image: {
     type: String,
     default: function () {
-      return defaultTagsImages[
-        Math.floor(Math.random() * defaultTagsImages.length)
-      ];
+      return defaultTagsImages[0];
     },
   },
   miniImage: {
     type: String,
     default: function () {
-      return defaultTagsImagesMini[
-        Math.floor(Math.random() * defaultTagsImagesMini.length)
-      ];
+      return defaultTagsImagesMini[0];
     },
   },
   name: { type: String, required: true, unique: true },
-  description: { type: String },
+  description: { type: String, default: "" },
   count: { type: Number, default: 0 },
 });
 
-tagsSchema.statics.add = function (name, image = "", description = "") {
-  return this.create({ name: name.toLowerCase() });
+tagsSchema.statics.add = function (params) {
+  const randowValue = Math.floor(Math.random() * defaultTagsImagesMini.length);
+  if (!params.image) {
+    params.image = defaultTagsImages[randowValue];
+  }
+
+  if (!params.miniImage) {
+    params.miniImage = defaultTagsImagesMini[randowValue];
+  }
+
+  return this.create({
+    name: params.name.toLowerCase(),
+    image: params.image,
+    miniImage: params.miniImage,
+    description: params.description,
+  });
 };
 
 tagsSchema.statics.deleteAll = function (name, image = "", description = "") {
