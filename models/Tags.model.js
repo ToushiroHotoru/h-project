@@ -1,5 +1,5 @@
 const { model, Schema } = require("mongoose");
-
+const os = require("os");
 const defaultTagsImages = [
   "/public/tags/tags_default_1.jpg",
   "/public/tags/tags_default_2.jpg",
@@ -49,6 +49,11 @@ tagsSchema.statics.add = function (params) {
 
 tagsSchema.statics.deleteAll = function (name, image = "", description = "") {
   return this.deleteMany({});
+};
+
+tagsSchema.statics.getAll = function (name, image = "", description = "") {
+  const allTags = this.find({});
+  return allTags;
 };
 
 module.exports = model("Tags", tagsSchema);
