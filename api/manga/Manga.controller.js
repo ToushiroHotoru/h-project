@@ -1,6 +1,6 @@
 const chalk = require("chalk");
-const Manga = require("../models/Manga.model");
-const MangaService = require("../service/Manga.service");
+const Manga = require("../../schemas/Manga.schema.js");
+const MangaService = require("../../service/Manga.service");
 
 class MangaController {
   async getAllMangas(request, reply) {
@@ -78,7 +78,7 @@ class MangaController {
       console.log(`New user error - ${chalk.red(err)}`);
     }
   }
-  
+
   async mangaAppendOne(request, reply) {
     try {
       await Manga.add(request.body);

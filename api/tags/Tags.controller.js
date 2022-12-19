@@ -1,5 +1,4 @@
-const Tags = require("../models/Tags.model");
-const os = require("os");
+const Tags = require("../../schemas/Tags.schema");
 
 class TagsController {
   async addTags(request, reply) {
