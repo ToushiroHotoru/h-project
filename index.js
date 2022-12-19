@@ -16,7 +16,7 @@ fastify.register(require("@fastify/static"), {
 });
 
 fastify.register(require("./plugins/mongoose.js"));
-fastify.register(require("./api/routes.js"));
+fastify.register(require("./routes/routes.js"));
 
 const start = async () => {
   try {

@@ -1,14 +1,16 @@
 const { model, Schema } = require("mongoose");
-const os = require("os");
+const standartTagsPath = "/public/tags/standart/";
+const miniTagsPath = "/public/tags/mini/";
+
 const defaultTagsImages = [
-  "/public/tags/tags_default_1.jpg",
-  "/public/tags/tags_default_2.jpg",
-  "/public/tags/tags_default_3.jpg",
+  "tags_default_1.jpg",
+  "tags_default_2.jpg",
+  "tags_default_3.jpg",
 ];
 const defaultTagsImagesMini = [
-  "/public/tags/mini_tags_default_1.jpg",
-  "/public/tags/mini_tags_default_2.jpg",
-  "/public/tags/mini_tags_default_3.jpg",
+  "mini_tags_default_1.jpg",
+  "mini_tags_default_2.jpg",
+  "mini_tags_default_3.jpg",
 ];
 
 const tagsSchema = new Schema({
@@ -32,11 +34,11 @@ const tagsSchema = new Schema({
 tagsSchema.statics.add = function (params) {
   const randowValue = Math.floor(Math.random() * defaultTagsImagesMini.length);
   if (!params.image) {
-    params.image = defaultTagsImages[randowValue];
+    params.image = standartTagsPath + defaultTagsImages[randowValue];
   }
 
   if (!params.miniImage) {
-    params.miniImage = defaultTagsImagesMini[randowValue];
+    params.miniImage = miniTagsPath + defaultTagsImagesMini[randowValue];
   }
 
   return this.create({
@@ -47,13 +49,12 @@ tagsSchema.statics.add = function (params) {
   });
 };
 
-tagsSchema.statics.deleteAll = function (name, image = "", description = "") {
+tagsSchema.statics.deleteAll = function () {
   return this.deleteMany({});
 };
 
-tagsSchema.statics.getAll = function (name, image = "", description = "") {
-  const allTags = this.find({});
-  return allTags;
+tagsSchema.statics.getAll = function () {
+  return this.find({});
 };
 
 module.exports = model("Tags", tagsSchema);

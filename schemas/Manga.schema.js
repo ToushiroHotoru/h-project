@@ -47,6 +47,7 @@ MangaSchema.statics.getStaticFields = function (id) {
 		'cycle',
 	]);
 };
+
 MangaSchema.statics.getDynamicFields = function (id) {
 	return this.findById(id).select([
 		'-title',
