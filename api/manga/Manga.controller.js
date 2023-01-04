@@ -1,6 +1,7 @@
 const chalk = require("chalk");
 const Manga = require("../../schemas/Manga.schema.js");
 const MangaService = require("../../service/Manga.service");
+const mongoose = require('mongoose');
 
 class MangaController {
   async getAllMangas(request, reply) {
@@ -81,7 +82,11 @@ class MangaController {
 
   async mangaAppendOne(request, reply) {
     try {
-      await Manga.add(request.body);
+      const manga = request.body;
+      manga.tags.forEach((item, i) => {
+        manga.tags[i] = mongoose.Types.ObjectId(item);
+      })
+      await Manga.add(manga);
       reply.code(200).send({ msg: "manga was written" });
     } catch (err) {
       console.log(`New user error - ${chalk.red(err)}`);

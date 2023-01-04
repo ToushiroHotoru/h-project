@@ -1,4 +1,7 @@
 const Manga = require("../schemas/Manga.schema");
+const mongoose = require('mongoose');
+
+const tags = ["63b2c36df0a695aa4ee12d27", "63b2c399f0a695aa4ee12d2a", "63b2c3d6f0a695aa4ee12d2c", "63b2c451f0a695aa4ee12d2e", "63b2c495f0a695aa4ee12d30", "63b2c4c4f0a695aa4ee12d32", "63b2c4f7f0a695aa4ee12d34", "63b2c5a4f0a695aa4ee12d36", "63b2c5d0f0a695aa4ee12d38"]
 
 const getRandomInt = (max) => {
   return Math.floor(Math.random() * max);
@@ -28,7 +31,8 @@ const mangaAppendService = async () => {
       cover: `/manga_cover/cover_${getRandomInt(7) + 1}.jpg`,
       artist: "Toushiro",
       series: "Toushiro's saga",
-      tags: ["pagination", "lero"],
+      tags: [mongoose.Types.ObjectId(tags[getRandomInt(9)]), mongoose.Types.ObjectId(tags[getRandomInt(9)]), mongoose.Types.ObjectId(tags[getRandomInt(9)])
+      ],
       likes: getRandomInt(1000),
       views: getRandomInt(10000),
       cycle: {
