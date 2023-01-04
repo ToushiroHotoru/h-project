@@ -7,14 +7,14 @@ const getRandomInt = (max) => {
   return Math.floor(Math.random() * max);
 };
 
-const mangaSort = async (sort, offset, step) => {
+const mangaSort = async (sort, offset, step, tag) => {
   let mangas = null;
   switch (sort) {
     case "latest":
-      mangas = await Manga.sortByTime(offset, step);
+      mangas = await Manga.sortByTime(offset, step, tag);
       break;
     case "alphabet":
-      mangas = await Manga.sortByAlphabet(offset, step);
+      mangas = await Manga.sortByAlphabet(offset, step, tag);
       break;
     default:
       mangas = { message: "такого типа сортировки нет" };

@@ -6,19 +6,19 @@ const mongoose = require('mongoose');
 class MangaController {
   async getAllMangas(request, reply) {
     try {
-      const { page, sort } = request.query;
+      const { page, sort, tag } = request.query;
       const reg = new RegExp("^[0-9]+$");
       const step = 24;
       const offset = step * (page - 1);
-      const total = await Manga.count();
+      let total = await Manga.count();
       let mangas = null;
 
       if (!reg.test(page) || page - 1 < 0 || page - 1 > total / 24) {
         reply.status(500).send({ message: "задана не верная страница" });
       }
 
-      mangas = await MangaService.mangaSort(sort, offset, step);
-
+      mangas = await MangaService.mangaSort(sort, offset, step, tag);
+      total = mangas.length;
       reply.code(200).send({ total, offset, step, mangas });
     } catch (err) {
       console.log(`Manga sort error - ${chalk.red(err)}`);

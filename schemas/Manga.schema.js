@@ -29,16 +29,26 @@ MangaSchema.statics.getAllMangasId = function() {
   return this.find({}).select('_id');
 };
 
-MangaSchema.statics.sortByTime = function(offset, step) {
-  return this.find({}).sort({ createdAt: 'desc' }).skip(offset).limit(step);
+MangaSchema.statics.sortByTime = function(offset, step, tag) {
+  if(tag){
+    return this.find({tags: tag}).sort({ createdAt: 'desc' }).skip(offset).limit(step).populate("tags").exec();
+  }
+  return this.find({}).sort({ createdAt: 'desc' }).skip(offset).limit(step).populate("tags").exec();
 };
 
-MangaSchema.statics.sortByAlphabet = function(offset, step) {
+MangaSchema.statics.sortByAlphabet = function(offset, step, tag) {
+  if(tag){
+      return this.find({tags: tag})
+    .collation({ locale: 'en', strength: 2 })
+    .sort({ title: 1 })
+    .skip(offset)
+    .limit(step).populate("tags").exec();
+  }
   return this.find({})
     .collation({ locale: 'en', strength: 2 })
     .sort({ title: 1 })
     .skip(offset)
-    .limit(step);
+    .limit(step).populate("tags").exec();
 };
 
 MangaSchema.statics.getStaticFields = function(id) {
