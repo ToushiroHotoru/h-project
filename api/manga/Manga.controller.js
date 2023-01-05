@@ -18,7 +18,11 @@ class MangaController {
       }
 
       mangas = await MangaService.mangaSort(sort, offset, step, tag);
-      total = mangas.length;
+
+      if (tag) {
+        total = mangas.length;
+      }
+
       reply.code(200).send({ total, offset, step, mangas });
     } catch (err) {
       console.log(`Manga sort error - ${chalk.red(err)}`);
