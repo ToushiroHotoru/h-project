@@ -16,10 +16,10 @@ class TagsController {
   async getTagsCount(request, reply) {
     try {
       let selectedTags = request.query?.tags
-        ? request.query.tags.split(",")
+        ? request.query.tags.split("%2C")
         : [];
       let tags2 = await Tags.getAll();
-      console.log(request);
+      console.log(selectedTags, selectedTags.length);
 
       if (selectedTags.length) {
         const unselectedTags = await Tags.find({
@@ -29,26 +29,30 @@ class TagsController {
           tags: { $all: [...selectedTags] },
         });
 
+        console.log("works 1");
+
         if (Array.isArray(selectedTags)) {
+
+          console.log("works 2");
           let result = await Promise.all(
             unselectedTags.map(async (item) => {
               let count = await Manga.find({
-                tags: { $all: [...selectedTags, item["name"]] },
+                tags: { $all: [...selectedTags, item["_id"]] },
               }).count();
               return { id: item["_id"], name: item["name"], count: count };
             })
           );
           console.log(result, "BBBBBBBB");
-          reply.code(200).send({ tags: "zero" });
+          reply.code(200).send({ tags: result.filter(item => item["count"] != 0) });
         }
 
         let result = await Promise.all(
           tags2.map(async (item) => {
-            let count = await Manga.find({ tags: item }).count();
+            let count = await Manga.find({ tags: selectedTags }).count();
             return { id: item["_id"], name: item["name"], count: count };
           })
         );
-        reply.code(200).send({ tags: "zero" });
+        reply.code(200).send({ tags: result.filter(item => item["count"] != 0) });
       }
 
       const tagsNotFiltered = await Promise.all(
