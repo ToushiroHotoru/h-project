@@ -15,68 +15,83 @@ class TagsController {
 
   async getTagsCount(request, reply) {
     try {
-      let selectedTags = request.params;
+      let selectedTags = request.query?.tags
+        ? request.query.tags.split(",")
+        : [];
       let tags2 = await Tags.getAll();
-      console.log(selectedTags);
+      console.log(request);
 
-      if (false) {
-        const unselectedTags = await Tags.find({ _id: { $nin: [...selectedTags] } });
-        const mangasWithSelectedTags = await Manga.find({ tags: { $all: [...selectedTags] } });
+      if (selectedTags.length) {
+        const unselectedTags = await Tags.find({
+          _id: { $nin: [...selectedTags] },
+        });
+        const mangasWithSelectedTags = await Manga.find({
+          tags: { $all: [...selectedTags] },
+        });
 
-        if (Array.isArray(tags)) {
-          let result = await Promise.all(unselectedTags.map(async (item) => {
-            let count = await Manga.find({ tags: { $all: [...selectedTags, item["name"]] } }).count();
-            return { id: item["_id"], name: item["name"], count: count };
-          }))
-          console.log(result, "BBBBBBBB")
+        if (Array.isArray(selectedTags)) {
+          let result = await Promise.all(
+            unselectedTags.map(async (item) => {
+              let count = await Manga.find({
+                tags: { $all: [...selectedTags, item["name"]] },
+              }).count();
+              return { id: item["_id"], name: item["name"], count: count };
+            })
+          );
+          console.log(result, "BBBBBBBB");
           reply.code(200).send({ tags: "zero" });
         }
 
-        let result = await Promise.all(tags2.map(async (item) => {
-          let count = await Manga.find({ tags: item }).count();
-          return { id: item["_id"], name: item["name"], count: count };
-        }))
+        let result = await Promise.all(
+          tags2.map(async (item) => {
+            let count = await Manga.find({ tags: item }).count();
+            return { id: item["_id"], name: item["name"], count: count };
+          })
+        );
         reply.code(200).send({ tags: "zero" });
       }
 
-      const tagsNotFiltered = await Promise.all(tags2.map(async (item) => {
-        let count = await Manga.find({ tags: item["_id"] }).count();
-        return { id: item["_id"], name: item["name"], count: count }
-      }))
+      const tagsNotFiltered = await Promise.all(
+        tags2.map(async (item) => {
+          let count = await Manga.find({ tags: item["_id"] }).count();
+          return { id: item["_id"], name: item["name"], count: count };
+        })
+      );
 
-      console.log(tagsNotFiltered, "AAAAAAAAAAA")
       reply.code(200).send({ tags: tagsNotFiltered });
     } catch (err) {
-      console.log(err.message)
+      console.log(err.message);
     }
-
   }
 
   async getAllTags(request, reply) {
-    console.log(request.query.tags, "AAAAAAAAAAAAA");
+    // console.log(request.query.tags, "AAAAAAAAAAAAA");
     let selectedTags = request.query.tags;
     let tags = await Tags.getAll();
-
-    console.log(tags, "BBBBBBBBBB");
     if (selectedTags) {
       if (Array.isArray(selectedTags)) {
-        const filteredTagsCount = await Manga.find({ tags: { $all: [...selectedTags] } });
-        reply.code(200).send({ tags: tags, filteredTagsCount: filteredTagsCount });
+        const filteredTagsCount = await Manga.find({
+          tags: { $all: [...selectedTags] },
+        });
+        reply
+          .code(200)
+          .send({ tags: tags, filteredTagsCount: filteredTagsCount });
       } else {
         const filteredTagsCount = await Manga.find({ tags: selectedTags });
-        reply.code(200).send({ tags: tags, filteredTagsCount: filteredTagsCount });
+        reply
+          .code(200)
+          .send({ tags: tags, filteredTagsCount: filteredTagsCount });
       }
     }
 
+    tags.forEach(async (tag) => {
+      let tagsCount = await Manga.find({ tags: tag }).count();
+      await Tags.findByIdAndUpdate(tag._id, { count: tagsCount });
+    });
 
+    tags = await Tags.getAll();
 
-    // для локального сервера
-    // tags = tags.map((tag) => {
-    //   tag.image = "http://localhost:8080" + tag.image;
-    //   tag.miniImage = "http://localhost:8080" + tag.miniImage;
-    //   return tag;
-    // });
-    reply.code(200).send({ tags: tags });
+    reply.code(200).send({ tags });
   }
 }
 
