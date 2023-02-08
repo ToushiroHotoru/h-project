@@ -6,7 +6,7 @@ const mongoose = require('mongoose');
 class MangaController {
   async getAllMangas(request, reply) {
     try {
-      const { page, sort, tag } = request.query;
+      const { page, sort, tags } = request.query;
       const reg = new RegExp("^[0-9]+$");
       const step = 24;
       const offset = step * (page - 1);
@@ -17,9 +17,9 @@ class MangaController {
         reply.status(500).send({ message: "задана не верная страница" });
       }
 
-      mangas = await MangaService.mangaSort(sort, offset, step, tag);
+      mangas = await MangaService.mangaSort(sort, offset, step, tags ? tags.split("%2C") : null);
 
-      if (tag) {
+      if (tags) {
         total = mangas.length;
       }
 
