@@ -1,5 +1,5 @@
 const { model, Schema } = require("mongoose");
-const standartTagsPath = "/public/tags/standart/";
+const commonTagsPath = "/public/tags/common/";
 const miniTagsPath = "/public/tags/mini/";
 
 const defaultTagsImages = [
@@ -34,7 +34,7 @@ const tagsSchema = new Schema({
 tagsSchema.statics.add = function (params) {
   const randowValue = Math.floor(Math.random() * defaultTagsImagesMini.length);
   if (!params.image) {
-    params.image = standartTagsPath + defaultTagsImages[randowValue];
+    params.image = commonTagsPath + defaultTagsImages[randowValue];
   }
 
   if (!params.miniImage) {
