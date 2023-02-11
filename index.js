@@ -15,6 +15,8 @@ fastify.register(require("@fastify/static"), {
   prefix: "/public/",
 });
 
+fastify.register(require("./plugins/bcrypt.js"));
+fastify.register(require("./plugins/jwt.js"));
 fastify.register(require("./plugins/mongoose.js"));
 fastify.register(require("./routes/routes.js"));
 

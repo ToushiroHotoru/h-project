@@ -33,6 +33,30 @@ class UserController {
       reply.code(500).send(err.message);
     }
   }
+
+
+  async setExceptionsTags(request, reply) {
+    try {
+      const { exceptionsTags, id } = request.body;
+      await User.setExceptionsTags({ exceptionsTags, id });
+      reply.code(200);
+    } catch (err) {
+      console.log(err.message);
+      reply.code(500).send(err.message);
+    }
+  }
+
+
+  async setAvatar(request, reply) {
+    try {
+      const { avatar, id } = request.body;
+      await User.setAvatar({ avatar, id });
+      reply.code(200);
+    } catch (err) {
+      console.log(err.message);
+      reply.code(500).send(err.message);
+    }
+  }
 }
 
 module.exports = new UserController();

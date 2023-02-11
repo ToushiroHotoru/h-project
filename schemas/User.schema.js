@@ -8,7 +8,10 @@ const userSchema = new Schema({
     type: Schema.Types.ObjectId,
     ref: "Tags", required: true
   }],
-  exceptionsTags: { type: Array },
+  exceptionsTags: [{
+    type: Schema.Types.ObjectId,
+    ref: "Tags", required: true
+  }],
   avatar: { type: String },
   banner: { type: String },
   favorites: { type: Array },
@@ -34,6 +37,14 @@ userSchema.statics.allUsers = function() {
 
 userSchema.statics.setPreferencesTags = function(params) {
   return this.updateOne({ _id: params.id }, { preferencesTags: params.preferencesTags }, { runValidators: true });
+}
+
+userSchema.statics.setExceptionsTags = function(params) {
+  return this.updateOne({ _id: params.id }, { exceptionsTags: params.exceptionsTags }, { runValidators: true });
+}
+
+userSchema.statics.setAvatar = function(params) {
+  return this.updateOne({ _id: params.id }, { avatar: params.avatar }, { runValidators: true });
 }
 
 module.exports = model('User', userSchema);
