@@ -3,9 +3,19 @@ const User = require("../../schemas/User.schema");
 class UserController {
   async registerUser(request, reply) {
     try {
-      const { email, username, password } = request.body;
-      await User.register({ email, username, password });
-      reply.code(200);
+      const { email, username, password } = JSON.parse(request.body);
+      const result = await User.register({
+        email,
+        username,
+        password,
+      });
+
+      reply.code(200).send({
+        success: true,
+        message: "Вы успешно зарегистрировались",
+        userId: result._id,
+        result,
+      });
     } catch (err) {
       console.log(err.message);
       reply.code(500).send({ error: err.message });
@@ -22,7 +32,6 @@ class UserController {
     }
   }
 
-
   async setPreferencesTags(request, reply) {
     try {
       const { preferencesTags, id } = request.body;
@@ -34,7 +43,6 @@ class UserController {
     }
   }
 
-
   async setExceptionsTags(request, reply) {
     try {
       const { exceptionsTags, id } = request.body;
@@ -45,7 +53,6 @@ class UserController {
       reply.code(500).send(err.message);
     }
   }
-
 
   async setAvatar(request, reply) {
     try {
