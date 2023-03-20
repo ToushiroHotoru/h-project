@@ -4,7 +4,7 @@ async function TagRoutes(fastify, options) {
 
   fastify.get("/all-users", UserController.getAllUsers);
 
-  fastify.post("/register", UserController.registerUser);
+  fastify.post("/registration", UserController.registerUser);
 
   fastify.post("/set-preferences-tags", UserController.setPreferencesTags);
 
