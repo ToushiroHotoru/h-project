@@ -6,14 +6,14 @@ const LINK =
 
 class AvatarController {
   async getAvatars(request, reply) {
-    const avatars = await Avatar.find({});
+    const avatars = await Avatar.find({type: 'site'}).lean();
     const modified = avatars.map((item) => {
-      return { id: item._id, image: LINK + item.image };
+      return { ...item, image: LINK + item.image };
     });
     reply.code(200).send({ avatars: modified });
   }
 
-  async setAvatar(request, reply) {
+  async setSiteAvatar(request, reply) {
     for (let i = 1; i < 18; i++) {
       let type = ["png", "jpg"];
       if ([1, 2, 6, 9, 14, 15, 17].includes(i)) {
