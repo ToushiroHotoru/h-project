@@ -6,11 +6,11 @@ async function TagRoutes(fastify, options) {
 
   fastify.post("/registration", UserController.registerUser);
 
-  fastify.post("/set-preferences-tags", UserController.setPreferencesTags);
+  fastify.post("/set_preferences_tags", UserController.setPreferencesTags);
 
-  fastify.post("/set-exceptions-tags", UserController.setExceptionsTags);
+  fastify.post("/set_exceptions_tags", UserController.setExceptionsTags);
 
-  fastify.post("/set-avatar", UserController.setAvatar);
+  fastify.post("/set_avatar", UserController.setAvatar);
 
 }
 
