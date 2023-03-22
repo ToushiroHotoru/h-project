@@ -76,16 +76,20 @@ class UserController {
 
   async setAvatar(request, reply) {
     try {
-      const data = await request.file();
-      console.log(request.body)
-      const file = data.fields.avatar;
-      const userId = data.fields.id.value;
-      const isUpload = data.fields.isUpload.value;
-      if (!isUpload) {
-        await User.setAvatar({ avatar: data.fields.avatar.value, userId });
-      } else {
-        const result = await Avatar.appendAvatar(file);
-        await User.setAvatar({ avatar: result._id, userId });
+      const parts = request.parts();
+      for await (const part of parts) {
+        if (part.type === "file" && part.fields.isUpload.value) {
+          const result = await Avatar.appendAvatar(part, part.fields.id.value);
+          await User.setAvatar({
+            avatar: result._id.toString(),
+            id: part.fields.id.value,
+          });
+        } else {
+          await User.setAvatar({
+            avatar: part.fields.avatar.value,
+            id: part.fields.id.value,
+          });
+        }
       }
       reply.code(200);
     } catch (err) {
