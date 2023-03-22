@@ -4,8 +4,6 @@ const User = require("../../schemas/User.schema");
 const Avatar = require("../../schemas/Avatars.schema");
 const TokenService = require("../../service/Token.service");
 
-// const bcryptSalt = 8;
-
 class UserController {
   constructor() {
     this.bcryptSalt = 8;
@@ -81,6 +79,7 @@ class UserController {
         ""
       );
       reply.code(200).send({
+        success: true,
         access_token: tokens.accessToken,
         refresh_token: tokens.refreshToken,
         user: {
