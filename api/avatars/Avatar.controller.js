@@ -18,12 +18,12 @@ class AvatarController {
       let type = ["png", "jpg"];
       if ([1, 2, 6, 9, 14, 15, 17].includes(i)) {
         await Avatar.create({
-          image: `/public/avatars/avatar${i}.${type[0]}`,
+          image: `/public/avatars/site_avatars/avatar${i}.${type[0]}`,
           type: "site",
         });
       } else {
         await Avatar.create({
-          image: `/public/avatars/avatar${i}.${type[1]}`,
+          image: `/public/avatars/site_avatars/avatar${i}.${type[1]}`,
           type: "site",
         });
       }
