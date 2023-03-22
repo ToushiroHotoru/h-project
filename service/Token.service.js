@@ -29,6 +29,10 @@ class TokenService {
         else return token;
       });
 
+      if (!newTokens.includes(newRefreshToken)) {
+        newTokens.push(newRefreshToken);
+      }
+
       tokenData.tokens = newTokens;
       return tokenData.save();
     }
