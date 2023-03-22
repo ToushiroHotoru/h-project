@@ -21,7 +21,10 @@ fastify.register(fastifyStatic, {
   prefix: "/upload/",
   decorateReply: false,
 });
-
+fastify.register(require("@fastify/cookie"), {
+  secret: "my-secret",
+  hook: "onRequest",
+});
 fastify.register(require("@fastify/multipart"));
 // fastify.register(require("bcryptjs"));
 // fastify.register(require("./plugins/bcrypt.js"));
