@@ -10,6 +10,7 @@
 	"author": "",
 	"license": "ISC",
 	"dependencies": {
+		"@fastify/auth": "^4.2.0",
 		"@fastify/cookie": "^8.3.0",
 		"@fastify/cors": "^8.1.0",
 		"@fastify/jwt": "^6.5.0",
