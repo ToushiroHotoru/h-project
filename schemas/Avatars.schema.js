@@ -30,11 +30,11 @@ AvatarSchema.statics.appendAvatar = async function (file, userId) {
   await pump(
     file.file,
     fs.createWriteStream(
-      path.resolve(__dirname, `../public/avatars/${newName}`)
+      path.resolve(__dirname, `../upload/user_avatars/${newName}`)
     )
   );
   return this.create({
-    image: path.join(`/public/avatars/${newName}`),
+    image: path.join(`/upload/user_avatars/${newName}`),
     userId: userId,
   });
 };
