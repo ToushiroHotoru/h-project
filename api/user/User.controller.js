@@ -1,12 +1,20 @@
+const bcrypt = require("bcryptjs");
+
 const User = require("../../schemas/User.schema");
 const Avatar = require("../../schemas/Avatars.schema");
+const TokenService = require("../../service/Token.service");
 
 class UserController {
+  constructor() {
+    this.bcryptSalt = 8;
+  }
   async registerUser(request, reply) {
     try {
       const { email, username, password } = JSON.parse(request.body);
-      const candidateWithUsername = await User.findOne({ username: username });
-      const candidateWithEmail = await User.findOne({ email: email });
+      const candidateWithUsername = await User.findOne({
+        username: username,
+      }).lean();
+      const candidateWithEmail = await User.findOne({ email: email }).lean();
 
       if (candidateWithUsername) {
         return reply.code(200).send({
@@ -22,10 +30,12 @@ class UserController {
         });
       }
 
+      const passwordHash = bcrypt.hashSync(password, this.bcryptSalt);
+
       const result = await User.register({
         email,
         username,
-        password,
+        password: passwordHash,
       });
 
       reply.code(200).send({
@@ -34,7 +44,49 @@ class UserController {
         userId: result._id,
       });
     } catch (err) {
-      console.log(err.message);
+      reply.code(500).send({ success: false, message: err.message });
+    }
+  }
+
+  async loginUser(request, reply) {
+    try {
+      const { email, password } = JSON.parse(request.body);
+      const user = await User.findOne({ email: email }).lean();
+      if (!user) {
+        return reply.code(404).send({
+          success: false,
+          message: "Пользователь с такой почтой не обнаружен",
+        });
+      }
+
+      const compareSync = bcrypt.compareSync(password, user.password);
+
+      if (!compareSync) {
+        return reply.code(404).send({
+          success: false,
+          message: "Неправильный пароль",
+        });
+      }
+      const payload = {
+        user: user._id,
+        userType: user.userType,
+        userName: user.username,
+      };
+      const tokens = TokenService.generateTokens(payload);
+      const tokenResult = await TokenService.saveToken(
+        user._id,
+        tokens.refreshToken,
+        ""
+      );
+      reply.code(200).send({
+        success: true,
+        access_token: tokens.accessToken,
+        refresh_token: tokens.refreshToken,
+        user: {
+          id: user._id,
+        },
+      });
+    } catch (error) {
       reply.code(500).send({ success: false, message: err.message });
     }
   }
@@ -76,16 +128,20 @@ class UserController {
 
   async setAvatar(request, reply) {
     try {
-      const data = await request.file();
-      console.log(request.body)
-      const file = data.fields.avatar;
-      const userId = data.fields.id.value;
-      const isUpload = data.fields.isUpload.value;
-      if (!isUpload) {
-        await User.setAvatar({ avatar: data.fields.avatar.value, userId });
-      } else {
-        const result = await Avatar.appendAvatar(file);
-        await User.setAvatar({ avatar: result._id, userId });
+      const parts = request.parts();
+      for await (const part of parts) {
+        if (part.type === "file" && part.fields.isUpload.value) {
+          const result = await Avatar.appendAvatar(part, part.fields.id.value);
+          await User.setAvatar({
+            avatar: result._id.toString(),
+            id: part.fields.id.value,
+          });
+        } else {
+          await User.setAvatar({
+            avatar: part.fields.avatar.value,
+            id: part.fields.id.value,
+          });
+        }
       }
       reply.code(200);
     } catch (err) {

@@ -1,5 +1,6 @@
 const fastify = require("fastify")({ logger: true });
 const cors = require("@fastify/cors");
+const fastifyStatic = require("@fastify/static");
 const chalk = require("chalk");
 const path = require("path");
 
@@ -10,11 +11,20 @@ fastify.register(cors, {
   origin: true,
 });
 
-fastify.register(require("@fastify/static"), {
+fastify.register(fastifyStatic, {
   root: path.join(__dirname, "public"),
   prefix: "/public/",
 });
 
+fastify.register(fastifyStatic, {
+  root: path.join(__dirname, "upload"),
+  prefix: "/upload/",
+  decorateReply: false,
+});
+fastify.register(require("@fastify/cookie"), {
+  secret: "my-secret",
+  hook: "onRequest",
+});
 fastify.register(require("@fastify/multipart"));
 // fastify.register(require("bcryptjs"));
 // fastify.register(require("./plugins/bcrypt.js"));

@@ -1,4 +1,3 @@
-const bcrypt = require("bcryptjs");
 
 const { model, Schema } = require("mongoose");
 
@@ -37,11 +36,10 @@ const userSchema = new Schema(
 );
 
 userSchema.statics.register = function (params) {
-  const hash = bcrypt.hashSync(params.password, 8);
 
   return this.create({
     username: params.username,
-    password: hash,
+    password: params.password,
     email: params.email,
   });
 };

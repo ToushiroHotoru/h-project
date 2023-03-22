@@ -10,6 +10,7 @@
 	"author": "",
 	"license": "ISC",
 	"dependencies": {
+		"@fastify/auth": "^4.2.0",
 		"@fastify/cookie": "^8.3.0",
 		"@fastify/cors": "^8.1.0",
 		"@fastify/jwt": "^6.5.0",
@@ -20,6 +21,7 @@
 		"cross-env": "^7.0.3",
 		"fastify": "^4.7.0",
 		"fastify-bcrypt": "^1.0.1",
+		"jsonwebtoken": "^9.0.0",
 		"mongoose": "^6.6.5",
 		"nodemon": "^2.0.20"
 	}
