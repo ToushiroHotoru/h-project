@@ -97,6 +97,19 @@ class UserController {
     }
   }
 
+  async logoutUser(request, reply) {
+    const refreshToken = request.cookies.refreshToken;
+    const verifiedToken = await TokenService.verifyRefreshToken(refreshToken);
+    await TokenService.removeRefreshToken(verifiedToken.user, refreshToken);
+    reply
+      .clearCookie("refreshToken", {
+        path: "/",
+        httpOnly: true,
+      })
+      .code(200)
+      .send({ success: true });
+  }
+
   async getAllUsers(request, reply) {
     try {
       const res = await User.allUsers();

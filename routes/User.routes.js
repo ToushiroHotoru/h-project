@@ -12,6 +12,8 @@ async function TagRoutes(fastify, options) {
   fastify.post("/set_exceptions_tags", UserController.setExceptionsTags);
 
   fastify.post("/set_avatar", UserController.setAvatar);
+
+  fastify.get("/logout", UserController.logoutUser);
 }
 
 module.exports = TagRoutes;
