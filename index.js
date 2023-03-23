@@ -11,6 +11,7 @@ fastify.register(cors, {
   origin: true,
 });
 
+// *---------Static files route------------ *//
 fastify.register(fastifyStatic, {
   root: path.join(__dirname, "public"),
   prefix: "/public/",
@@ -21,16 +22,30 @@ fastify.register(fastifyStatic, {
   prefix: "/upload/",
   decorateReply: false,
 });
+// *---------Static files route------------ *//
+
+// *---------Cookie parser------------ *//
 fastify.register(require("@fastify/cookie"), {
   secret: "my-secret",
   hook: "onRequest",
 });
+// *---------Cookie parser------------ *//
+
+// *---------Formdata parser------------ *//
 fastify.register(require("@fastify/multipart"));
-// fastify.register(require("bcryptjs"));
-// fastify.register(require("./plugins/bcrypt.js"));
-fastify.register(require("./plugins/jwt.js"));
+// *---------Formdata parser------------ *//
+
+// *---------Mongo Connect------------ *//
 fastify.register(require("./plugins/mongoose.js"));
+// *---------Mongo Connect------------ *//
+
+// *---------Auth plugin------------ *//
+fastify.register(require("@fastify/auth"));
+// *---------Auth plugin------------ *//
+
+// *---------Rooutes------------ *//
 fastify.register(require("./routes/routes.js"));
+// *---------Rooutes------------ *//
 
 const start = async () => {
   try {
