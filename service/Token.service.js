@@ -20,6 +20,7 @@ class TokenService {
       };
     } catch (error) {}
   }
+
   async saveToken(userId, newRefreshToken, oldRefreshToken) {
     const tokenData = await Token.findOne({ user: userId });
 
@@ -42,6 +43,26 @@ class TokenService {
       tokens: newRefreshToken,
     });
     return token;
+  }
+
+  async verifyAccessToken(token) {
+    const tokenData = jwt.verify(token, jwtSecret);
+    return tokenData;
+  }
+
+  async verifyRefreshToken(token) {
+    const tokenData = jwt.verify(token, jwtSecretRefresh);
+    return tokenData;
+  }
+
+  async removeRefreshToken(userId, token) {
+    const tokenData = await Token.findOne({ user: userId });
+    const newTokens = tokenData.tokens.filter((item) => {
+      if (item !== token) return item;
+    });
+
+    tokenData.tokens = newTokens;
+    await tokenData.save();
   }
 }
 

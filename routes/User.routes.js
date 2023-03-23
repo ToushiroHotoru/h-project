@@ -1,8 +1,6 @@
 const UserController = require("../api/user/User.controller");
 
-async function TagRoutes(fastify, options) {
-  fastify.get("/all-users", UserController.getAllUsers);
-
+async function UserRoutes(fastify, options) {
   fastify.post("/registration", UserController.registerUser);
 
   fastify.post("/login", UserController.loginUser);
@@ -14,4 +12,4 @@ async function TagRoutes(fastify, options) {
   fastify.post("/set_avatar", UserController.setAvatar);
 }
 
-module.exports = TagRoutes;
+module.exports = UserRoutes;
