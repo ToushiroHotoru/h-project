@@ -78,14 +78,20 @@ class UserController {
         tokens.refreshToken,
         ""
       );
-      reply.code(200).send({
-        success: true,
-        access_token: tokens.accessToken,
-        refresh_token: tokens.refreshToken,
-        user: {
-          id: user._id,
-        },
-      });
+      reply
+        .setCookie("refreshToken", tokens.refreshToken, {
+          path: "/",
+          httpOnly: true,
+        })
+        .code(200)
+        .send({
+          success: true,
+          access_token: tokens.accessToken,
+          refresh_token: tokens.refreshToken,
+          user: {
+            id: user._id,
+          },
+        });
     } catch (error) {
       reply.code(500).send({ success: false, message: err.message });
     }
