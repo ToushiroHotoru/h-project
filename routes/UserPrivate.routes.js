@@ -40,7 +40,7 @@ async function UserPrivateRoutes(fastify, options) {
       });
 
       fastify.route({
-        method: "GET",
+        method: "POST",
         url: "/profile",
         preHandler: fastify.auth([fastify.verifyJwt]),
         handler: UserController.profile,
