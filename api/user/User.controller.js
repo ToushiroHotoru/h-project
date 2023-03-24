@@ -160,7 +160,34 @@ class UserController {
   }
 
   async profile(requst, reply) {
-    reply.code(200).send({ message: "Auth done" });
+    const { username } = requst.body;
+    const data = {};
+
+    const user = await User.findOne({ _id: requst.user.user }).lean();
+
+    if (!user) {
+      return reply
+        .code(404)
+        .send({
+          message: "Пользователь с таким никнеймом не найден",
+          success: true,
+        });
+    }
+
+    if (user.username === username) {
+      data = {
+        username: user.username,
+        email: user.email,
+        preferencesTags: user.preferencesTags,
+        exceptionsTags: user.exceptionsTags,
+      };
+    } else {
+      data = {
+        username: user.username,
+        email: user.email,
+      };
+    }
+    reply.code(200).send({ message: data });
   }
 
   async getAllUsers(request, reply) {
