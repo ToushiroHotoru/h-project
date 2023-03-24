@@ -10,6 +10,8 @@ async function UserRoutes(fastify, options) {
   fastify.post("/set_exceptions_tags", UserController.setExceptionsTags);
 
   fastify.post("/set_avatar", UserController.setAvatar);
+
+  fastify.post("/refresh", UserController.refresh);
 }
 
 module.exports = UserRoutes;
