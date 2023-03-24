@@ -73,11 +73,7 @@ class UserController {
         userName: user.username,
       };
       const tokens = TokenService.generateTokens(payload);
-      const tokenResult = await TokenService.saveToken(
-        user._id,
-        tokens.refreshToken,
-        ""
-      );
+      await TokenService.saveToken(user._id, tokens.refreshToken, "");
       reply
         .setCookie("refreshToken", tokens.refreshToken, {
           path: "/",
@@ -98,16 +94,100 @@ class UserController {
   }
 
   async logoutUser(request, reply) {
-    const refreshToken = request.cookies.refreshToken;
-    const verifiedToken = await TokenService.verifyRefreshToken(refreshToken);
-    await TokenService.removeRefreshToken(verifiedToken.user, refreshToken);
-    reply
-      .clearCookie("refreshToken", {
-        path: "/",
-        httpOnly: true,
-      })
-      .code(200)
-      .send({ success: true });
+    try {
+      const refreshToken = request.cookies.refreshToken;
+      const verifiedToken = await TokenService.verifyRefreshToken(refreshToken);
+      await TokenService.removeRefreshToken(verifiedToken.user, refreshToken);
+      reply
+        .clearCookie("refreshToken", {
+          path: "/",
+          httpOnly: true,
+        })
+        .code(200)
+        .send({ success: true });
+    } catch (error) {
+      reply.code(500).send({ error: error });
+    }
+  }
+
+  async refresh(request, reply) {
+    try {
+      const refreshToken = request.cookies.refreshToken;
+      const verifiedToken = await TokenService.verifyRefreshToken(refreshToken);
+
+      if (!verifiedToken) {
+        return reply
+          .code(401)
+          .send({ success: false, message: "Invalid refresh" });
+      }
+
+      const userData = await User.findOne({ _id: verifiedToken.user });
+
+      const tokenFromDb = await TokenService.findToken(
+        verifiedToken.user,
+        refreshToken
+      );
+
+      if (!tokenFromDb) {
+        return reply
+          .code(401)
+          .send({ success: false, message: "Token not found" });
+      }
+
+      const tokens = await TokenService.refresh({
+        user: verifiedToken.user,
+        refreshToken: refreshToken,
+        payload: {
+          user: userData._id,
+          userType: userData.userType,
+          userName: userData.username,
+        },
+      });
+
+      reply
+        .setCookie("refreshToken", tokens.refreshToken, {
+          path: "/",
+          httpOnly: true,
+        })
+        .code(200)
+        .send({
+          success: true,
+          accessToken: tokens.accessToken,
+        });
+    } catch (error) {
+      reply.code(500).send({ error: error });
+    }
+  }
+
+  async profile(requst, reply) {
+    const { username } = requst.body;
+    const data = {};
+
+    const user = await User.findOne({ _id: requst.user.user }).lean();
+
+    if (!user) {
+      return reply
+        .code(404)
+        .send({
+          message: "Пользователь с таким никнеймом не найден",
+          success: true,
+        });
+    }
+
+    if (user.username === username) {
+      data = {
+        username: user.username,
+        email: user.email,
+        preferencesTags: user.preferencesTags,
+        exceptionsTags: user.exceptionsTags,
+      };
+    } else {
+      data = {
+        username: user.username,
+        email: user.email,
+      };
+    }
+    reply.code(200).send({ message: data });
   }
 
   async getAllUsers(request, reply) {

@@ -18,31 +18,37 @@ class TokenService {
         accessToken,
         refreshToken,
       };
-    } catch (error) {}
+    } catch (error) {
+      return null;
+    }
   }
 
   async saveToken(userId, newRefreshToken, oldRefreshToken) {
-    const tokenData = await Token.findOne({ user: userId });
+    try {
+      const tokenData = await Token.findOne({ user: userId });
 
-    if (tokenData) {
-      const newTokens = tokenData.tokens.map((token) => {
-        if (oldRefreshToken === token) return newRefreshToken;
-        else return token;
-      });
+      if (tokenData) {
+        const newTokens = tokenData.tokens.map((token) => {
+          if (oldRefreshToken === token) return newRefreshToken;
+          else return token;
+        });
 
-      if (!newTokens.includes(newRefreshToken)) {
-        newTokens.push(newRefreshToken);
+        if (!newTokens.includes(newRefreshToken)) {
+          newTokens.push(newRefreshToken);
+        }
+
+        tokenData.tokens = newTokens;
+        return tokenData.save();
       }
 
-      tokenData.tokens = newTokens;
-      return tokenData.save();
+      const token = Token.create({
+        user: userId,
+        tokens: newRefreshToken,
+      });
+      return token;
+    } catch (error) {
+      return null;
     }
-
-    const token = Token.create({
-      user: userId,
-      tokens: newRefreshToken,
-    });
-    return token;
   }
 
   async verifyAccessToken(token) {
@@ -56,13 +62,52 @@ class TokenService {
   }
 
   async removeRefreshToken(userId, token) {
-    const tokenData = await Token.findOne({ user: userId });
-    const newTokens = tokenData.tokens.filter((item) => {
-      if (item !== token) return item;
-    });
+    try {
+      const tokenData = await Token.findOne({ user: userId });
+      const newTokens = tokenData.tokens.filter((item) => {
+        if (item !== token) return item;
+      });
 
-    tokenData.tokens = newTokens;
-    await tokenData.save();
+      tokenData.tokens = newTokens;
+      await tokenData.save();
+    } catch (error) {
+      return null;
+    }
+  }
+
+  async findToken(userId, refreshToken) {
+    try {
+      const tokenData = await Token.findOne({ user: userId });
+      const token = tokenData.tokens.filter((item) => {
+        if (item === refreshToken) return item;
+      });
+
+      return token;
+    } catch (error) {
+      return null;
+    }
+  }
+
+  async refresh(params) {
+    try {
+      const newGeneratedTokens = this.generateTokens(params.payload);
+      const tokenData = await Token.findOne({ user: params.user });
+      const newTokens = tokenData.tokens.map((token) => {
+        if (params.refreshToken === token)
+          return newGeneratedTokens.refreshToken;
+        else return token;
+      });
+
+      tokenData.tokens = newTokens;
+      await tokenData.save();
+
+      return {
+        accessToken: newGeneratedTokens.accessToken,
+        refreshToken: newGeneratedTokens.refreshToken,
+      };
+    } catch (error) {
+      return null;
+    }
   }
 }
 
