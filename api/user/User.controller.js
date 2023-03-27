@@ -86,6 +86,7 @@ class UserController {
           refresh_token: tokens.refreshToken,
           user: {
             id: user._id,
+            userName: user.username,
           },
         });
     } catch (error) {
@@ -161,17 +162,17 @@ class UserController {
 
   async profile(requst, reply) {
     const { username } = requst.body;
-    const data = {};
+    let data = {};
+
+    console.log(requst)
 
     const user = await User.findOne({ _id: requst.user.user }).lean();
 
     if (!user) {
-      return reply
-        .code(404)
-        .send({
-          message: "Пользователь с таким никнеймом не найден",
-          success: true,
-        });
+      return reply.code(404).send({
+        message: "Пользователь с таким никнеймом не найден",
+        success: true,
+      });
     }
 
     if (user.username === username) {
