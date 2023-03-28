@@ -9,6 +9,7 @@ const HOST = process.env.NODE_ENV === "development" ? "localhost" : "0.0.0.0";
 
 fastify.register(cors, {
   origin: true,
+  credentials: true
 });
 
 // *---------Static files route------------ *//
