@@ -1,7 +1,7 @@
 const chalk = require("chalk");
 const Manga = require("../../schemas/Manga.schema.js");
 const MangaService = require("../../service/Manga.service");
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 class MangaController {
   async getAllMangas(request, reply) {
@@ -17,7 +17,12 @@ class MangaController {
         reply.status(500).send({ message: "задана не верная страница" });
       }
 
-      mangas = await MangaService.mangaSort(sort, offset, step, tags ? tags.split("%2C") : null);
+      mangas = await MangaService.mangaSort(
+        sort,
+        offset,
+        step,
+        tags ? tags.split("%2C") : null
+      );
 
       if (tags) {
         total = mangas.length;
@@ -86,15 +91,23 @@ class MangaController {
 
   async mangaAppendOne(request, reply) {
     try {
-      const manga = request.body;
-      manga.tags.forEach((item, i) => {
-        manga.tags[i] = mongoose.Types.ObjectId(item);
-      })
-      await Manga.add(manga);
-      reply.code(200).send({ msg: "manga was written" });
+      const result = await MangaService.mangaAppendOneService();
+      console.log(result);
+      reply.code(200).send({ msg: `manga was written ${result._id}` });
     } catch (err) {
       console.log(`New user error - ${chalk.red(err)}`);
     }
+  }
+
+  async newMangas(req, reply) {
+    try {
+      const manga = await Manga.find({})
+        .sort({ createdAt: "desc" })
+        .select("_id title cover")
+        .limit(8)
+        .lean();
+      reply.code(200).send({ manga: manga });
+    } catch (error) {}
   }
 }
 
