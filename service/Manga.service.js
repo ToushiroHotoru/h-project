@@ -1,7 +1,17 @@
 const Manga = require("../schemas/Manga.schema");
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
-const tags = ["63b2c36df0a695aa4ee12d27", "63b2c399f0a695aa4ee12d2a", "63b2c3d6f0a695aa4ee12d2c", "63b2c451f0a695aa4ee12d2e", "63b2c495f0a695aa4ee12d30", "63b2c4c4f0a695aa4ee12d32", "63b2c4f7f0a695aa4ee12d34", "63b2c5a4f0a695aa4ee12d36", "63b2c5d0f0a695aa4ee12d38"]
+const tags = [
+  "63b2c36df0a695aa4ee12d27",
+  "63b2c399f0a695aa4ee12d2a",
+  "63b2c3d6f0a695aa4ee12d2c",
+  "63b2c451f0a695aa4ee12d2e",
+  "63b2c495f0a695aa4ee12d30",
+  "63b2c4c4f0a695aa4ee12d32",
+  "63b2c4f7f0a695aa4ee12d34",
+  "63b2c5a4f0a695aa4ee12d36",
+  "63b2c5d0f0a695aa4ee12d38",
+];
 
 const getRandomInt = (max) => {
   return Math.floor(Math.random() * max);
@@ -31,7 +41,10 @@ const mangaAppendService = async () => {
       cover: `/manga_cover/cover_${getRandomInt(7) + 1}.jpg`,
       artist: "Toushiro",
       series: "Toushiro's saga",
-      tags: [mongoose.Types.ObjectId(tags[getRandomInt(9)]), mongoose.Types.ObjectId(tags[getRandomInt(9)]), mongoose.Types.ObjectId(tags[getRandomInt(9)])
+      tags: [
+        mongoose.Types.ObjectId(tags[getRandomInt(9)]),
+        mongoose.Types.ObjectId(tags[getRandomInt(9)]),
+        mongoose.Types.ObjectId(tags[getRandomInt(9)]),
       ],
       likes: getRandomInt(1000),
       views: getRandomInt(10000),
@@ -69,7 +82,55 @@ const mangaAppendService = async () => {
   }
 };
 
+const mangaAppendOneService = async () => {
+  const result = await Manga.add({
+    title: `Manga ${getRandomInt(1000)}`,
+    cover: `/manga_cover/cover_${getRandomInt(7) + 1}.jpg`,
+    artist: "Toushiro",
+    series: "Toushiro's saga",
+    tags: [
+      mongoose.Types.ObjectId(tags[getRandomInt(9)]),
+      mongoose.Types.ObjectId(tags[getRandomInt(9)]),
+      mongoose.Types.ObjectId(tags[getRandomInt(9)]),
+    ],
+    likes: getRandomInt(1000),
+    views: getRandomInt(10000),
+    cycle: {
+      name: "Neverland",
+      part: 1,
+    },
+    pages: [
+      "/test_manga_storage/1.jpg",
+      "/test_manga_storage/2.jpg",
+      "/test_manga_storage/3.jpg",
+      "/test_manga_storage/4.jpg",
+      "/test_manga_storage/5.jpg",
+      "/test_manga_storage/6.jpg",
+      "/test_manga_storage/7.jpg",
+      "/test_manga_storage/8.jpg",
+      "/test_manga_storage/9.jpg",
+      "/test_manga_storage/10.jpg",
+      "/test_manga_storage/11.jpg",
+      "/test_manga_storage/12.jpg",
+      "/test_manga_storage/13.jpg",
+      "/test_manga_storage/14.jpg",
+      "/test_manga_storage/15.jpg",
+      "/test_manga_storage/16.jpg",
+      "/test_manga_storage/17.jpg",
+      "/test_manga_storage/18.jpg",
+      "/test_manga_storage/19.jpg",
+      "/test_manga_storage/20.jpg",
+      "/test_manga_storage/21.jpg",
+      "/test_manga_storage/22.jpg",
+      "/test_manga_storage/23.jpg",
+      "/test_manga_storage/24.jpg",
+    ],
+  });
+  return result;
+};
+
 module.exports = {
   mangaSort,
   mangaAppendService,
+  mangaAppendOneService,
 };
