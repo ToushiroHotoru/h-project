@@ -33,17 +33,17 @@ async function UserPrivateRoutes(fastify, options) {
       });
 
       fastify.route({
-        method: "GET",
+        method: "DELETE",
         url: "/logout",
         preHandler: fastify.auth([fastify.verifyJwt]),
         handler: UserController.logoutUser,
       });
 
       fastify.route({
-        method: "POST",
-        url: "/profile",
+        method: "GET",
+        url: "/user",
         preHandler: fastify.auth([fastify.verifyJwt]),
-        handler: UserController.profile,
+        handler: UserController.userProfile,
       });
     });
 }
