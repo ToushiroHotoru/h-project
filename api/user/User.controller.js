@@ -50,7 +50,7 @@ class UserController {
 
   async loginUser(request, reply) {
     try {
-      const { email, password } = JSON.parse(request.body);
+      const { email, password } = request.body;
       const user = await User.findOne({ email: email }).lean();
       if (!user) {
         return reply.code(404).send({
@@ -82,15 +82,14 @@ class UserController {
         .code(200)
         .send({
           success: true,
-          access_token: tokens.accessToken,
-          refresh_token: tokens.refreshToken,
+          accessToken: tokens.accessToken,
           user: {
             id: user._id,
             userName: user.username,
           },
         });
     } catch (error) {
-      reply.code(500).send({ success: false, message: err.message });
+      reply.code(500).send({ success: false, message: error.message });
     }
   }
 
@@ -152,43 +151,30 @@ class UserController {
         })
         .code(200)
         .send({
-          success: true,
           accessToken: tokens.accessToken,
+          user: {
+            id: userData._id,
+            userName: userData.username,
+          },
         });
     } catch (error) {
       reply.code(500).send({ error: error });
     }
   }
 
-  async profile(requst, reply) {
-    const { username } = requst.body;
-    let data = {};
+  async userProfile(requst, reply) {
+    const userDB = await User.findOne({ _id: requst.user.user })
+      .select(["username", "email", "preferencesTags", "exceptionsTags"])
+      .lean();
 
-    console.log(requst)
-
-    const user = await User.findOne({ _id: requst.user.user }).lean();
-
-    if (!user) {
+    if (!userDB) {
       return reply.code(404).send({
         message: "Пользователь с таким никнеймом не найден",
         success: true,
       });
     }
 
-    if (user.username === username) {
-      data = {
-        username: user.username,
-        email: user.email,
-        preferencesTags: user.preferencesTags,
-        exceptionsTags: user.exceptionsTags,
-      };
-    } else {
-      data = {
-        username: user.username,
-        email: user.email,
-      };
-    }
-    reply.code(200).send({ message: data });
+    reply.code(200).send({ user: userDB });
   }
 
   async getAllUsers(request, reply) {
