@@ -8,12 +8,12 @@ async function UserPrivateRoutes(fastify, options) {
         const authHeader = request.headers.authorization;
 
         if (!authHeader) {
-          throw new Error("No token was sent");
+          return reply.code(401).send({ error: "No token was sent" });
         }
 
         const bearerToken = authHeader.split(" ")[1];
         if (!bearerToken) {
-          throw new Error("Token not found");
+          return reply.code(401).send({ error: "Token not found" });
         }
 
         const userData = await TokenService.verifyAccessToken(bearerToken);
@@ -37,13 +37,6 @@ async function UserPrivateRoutes(fastify, options) {
         url: "/logout",
         preHandler: fastify.auth([fastify.verifyJwt]),
         handler: UserController.logoutUser,
-      });
-
-      fastify.route({
-        method: "GET",
-        url: "/user",
-        preHandler: fastify.auth([fastify.verifyJwt]),
-        handler: UserController.userProfile,
       });
     });
 }

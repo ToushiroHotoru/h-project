@@ -163,7 +163,7 @@ class UserController {
   }
 
   async userProfile(requst, reply) {
-    const userDB = await User.findOne({ _id: requst.user.user })
+    const userDB = await User.findOne({ username: requst.query.username })
       .select(["username", "email", "preferencesTags", "exceptionsTags"])
       .lean();
 
