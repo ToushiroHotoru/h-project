@@ -1,7 +1,11 @@
 const Manga = require("../../schemas/Manga.schema");
 const User = require("../../schemas/User.schema");
 const Comments = require("../../schemas/Comments.schema");
-
+const Avatar = require("../../schemas/Avatars.schema");
+const LINK =
+  process.env.NODE_ENV !== "development"
+    ? "https://h-project.toushirohotoru.repl.co"
+    : "http://localhost:8080";
 class CommentsController {
   async addComment(request, reply) {
     try {
@@ -32,9 +36,25 @@ class CommentsController {
   async getMangaComments(request, reply) {
     try {
       const { mangaId } = request.query;
-      const comments = await Comments.find({ manga: mangaId }).lean();
+      const comments = await Comments.find({ manga: mangaId })
+        .select(["_id", "text", "user", "answersFor", "createdAt"])
+        .lean();
+      const comments2 = await Promise.all(
+        comments.map(async function (item) {
+          const userId = item.user.toString();
+          let user = await User.findById(userId)
+            .select(["username", "avatar", "_id"])
+            .lean();
+          const avatar = await Avatar.findById(user.avatar)
+            .select(["image"])
+            .lean();
+          user = { ...user, avatar: LINK + avatar.image };
+          const newItem = { ...item, user: user };
+          return newItem;
+        })
+      );
 
-      reply.code(200).send({ comments });
+      reply.code(200).send({ comments: comments2 });
     } catch (error) {
       reply.code(500).send({ error });
     }
