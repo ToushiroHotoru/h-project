@@ -28,6 +28,17 @@ class CommentsController {
       reply.code(500).send({ success: false, message: error });
     }
   }
+
+  async getMangaComments(request, reply) {
+    try {
+      const { mangaId } = request.query;
+      const comments = await Comments.find({ manga: mangaId }).lean();
+
+      reply.code(200).send({ comments });
+    } catch (error) {
+      reply.code(500).send({ error });
+    }
+  }
 }
 
 module.exports = new CommentsController();
