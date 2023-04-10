@@ -20,4 +20,12 @@ const CommentsSchema = new Schema(
   { timestamp: true }
 );
 
+CommentsSchema.statics.addComment = function ({ text, mangaId, userId }) {
+  return this.create({
+    text: text,
+    user: userId,
+    manga: mangaId,
+  });
+};
+
 module.exports = model("Comments", CommentsSchema);
