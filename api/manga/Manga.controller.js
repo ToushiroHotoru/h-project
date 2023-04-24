@@ -64,7 +64,8 @@ class MangaController {
 
   async getStatic(request, reply) {
     try {
-      const manga = await Manga.getStaticFields(request.body.id);
+      const id = request.query.id;
+      const manga = await Manga.getStaticFields(id);
       reply.code(200).send(manga);
     } catch (err) {
       console.log(`manga error - ${chalk.red(err)}`);
@@ -73,7 +74,8 @@ class MangaController {
 
   async getDynamic(request, reply) {
     try {
-      const manga = await Manga.getDynamicFields(request.body.id);
+      const id = request.query.id;
+      const manga = await Manga.getDynamicFields(id);
       reply.code(200).send(manga);
     } catch (err) {
       console.log(`manga error - ${chalk.red(err)}`);
