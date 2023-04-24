@@ -17,7 +17,7 @@ const CommentsSchema = new Schema(
       default: null,
     },
   },
-  { timestamp: true }
+  { timestamps: true }
 );
 
 CommentsSchema.statics.addComment = function ({ text, mangaId, userId }) {
