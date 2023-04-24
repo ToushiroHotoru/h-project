@@ -78,11 +78,11 @@ class UserController {
         .setCookie("refreshToken", tokens.refreshToken, {
           path: "/",
           httpOnly: true,
-          secure: process.env.NODE_ENV !== "production" ? true : false,
+          secure: process.env.NODE_ENV === "production" ? true : false,
         })
         .setCookie("accessToken", tokens.accessToken, {
           path: "/",
-          secure: process.env.NODE_ENV !== "production" ? true : false,
+          secure: process.env.NODE_ENV === "production" ? true : false,
         })
         .code(200)
         .send({
@@ -118,6 +118,11 @@ class UserController {
   async refresh(request, reply) {
     try {
       const refreshToken = request.cookies.refreshToken;
+      if (!refreshToken) {
+        return reply
+          .code(401)
+          .send({ success: false, message: "Не авторизованы", code: 401 });
+      }
       const verifiedToken = await TokenService.verifyRefreshToken(refreshToken);
 
       if (!verifiedToken) {
@@ -153,11 +158,11 @@ class UserController {
         .setCookie("refreshToken", tokens.refreshToken, {
           path: "/",
           httpOnly: true,
-          secure: process.env.NODE_ENV !== "production" ? true : false,
+          secure: process.env.NODE_ENV === "production" ? true : false,
         })
         .setCookie("accessToken", tokens.accessToken, {
           path: "/",
-          secure: process.env.NODE_ENV !== "production" ? true : false,
+          secure: process.env.NODE_ENV === "production" ? true : false,
         })
         .code(200)
         .send({
@@ -168,7 +173,7 @@ class UserController {
           },
         });
     } catch (error) {
-      reply.code(500).send({ error: error });
+      reply.code(401).send({ error: error });
     }
   }
 
