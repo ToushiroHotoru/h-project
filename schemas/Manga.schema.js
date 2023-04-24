@@ -33,23 +33,23 @@ MangaSchema.statics.getAllMangasId = function () {
 };
 
 MangaSchema.statics.sortByTime = function (offset, step, tags) {
-  if (tags) {
-    if (Array.isArray(tags)) {
-      return this.find({ tags: { $all: [...tags] } })
-        .sort({ createdAt: "desc" })
-        .skip(offset)
-        .limit(step)
-        .populate("tags")
-        .exec();
-    }
-    return this.find({ tags: tags })
+  if (!tags) {
+    return this.find({})
       .sort({ createdAt: "desc" })
       .skip(offset)
       .limit(step)
       .populate("tags")
       .exec();
   }
-  return this.find({})
+  if (Array.isArray(tags)) {
+    return this.find({ tags: { $all: [...tags] } })
+      .sort({ createdAt: "desc" })
+      .skip(offset)
+      .limit(step)
+      .populate("tags")
+      .exec();
+  }
+  return this.find({ tags: tags })
     .sort({ createdAt: "desc" })
     .skip(offset)
     .limit(step)
@@ -58,17 +58,8 @@ MangaSchema.statics.sortByTime = function (offset, step, tags) {
 };
 
 MangaSchema.statics.sortByAlphabet = function (offset, step, tags) {
-  if (tags) {
-    if (Array.isArray(tags)) {
-      return this.find({ tags: { $all: [...tags] } })
-        .collation({ locale: "en", strength: 2 })
-        .sort({ title: 1 })
-        .skip(offset)
-        .limit(step)
-        .populate("tags")
-        .exec();
-    }
-    return this.find({ tags: tags })
+  if (!tags) {
+    return this.find({})
       .collation({ locale: "en", strength: 2 })
       .sort({ title: 1 })
       .skip(offset)
@@ -76,7 +67,16 @@ MangaSchema.statics.sortByAlphabet = function (offset, step, tags) {
       .populate("tags")
       .exec();
   }
-  return this.find({})
+  if (Array.isArray(tags)) {
+    return this.find({ tags: { $all: [...tags] } })
+      .collation({ locale: "en", strength: 2 })
+      .sort({ title: 1 })
+      .skip(offset)
+      .limit(step)
+      .populate("tags")
+      .exec();
+  }
+  return this.find({ tags: tags })
     .collation({ locale: "en", strength: 2 })
     .sort({ title: 1 })
     .skip(offset)
