@@ -9,9 +9,9 @@ async function MangaRoutes(fastify, options) {
 
   fastify.post("/write-many", MangaController.mangaAppendMany);
 
-  fastify.post("/manga-static", MangaController.getStatic);
+  fastify.get("/manga-static", MangaController.getStatic);
 
-  fastify.post("/manga-dynamic", MangaController.getDynamic);
+  fastify.get("/manga-dynamic", MangaController.getDynamic);
 
   fastify.delete("/delete-one", MangaController.deleteMangaById);
 
