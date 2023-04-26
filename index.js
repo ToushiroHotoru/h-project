@@ -9,7 +9,7 @@ const HOST = process.env.NODE_ENV === "development" ? "localhost" : "0.0.0.0";
 
 fastify.register(cors, {
   origin: true,
-  credentials: true
+  credentials: true,
 });
 
 // *---------Static files route------------ *//
@@ -21,6 +21,18 @@ fastify.register(fastifyStatic, {
 fastify.register(fastifyStatic, {
   root: path.join(__dirname, "upload"),
   prefix: "/upload/",
+  decorateReply: false,
+});
+
+// ! Удалить в будущем
+fastify.register(fastifyStatic, {
+  root: path.join(__dirname, "test_manga_storage"),
+  prefix: "/test_manga_storage/",
+  decorateReply: false,
+});
+fastify.register(fastifyStatic, {
+  root: path.join(__dirname, "manga_cover"),
+  prefix: "/manga_cover/",
   decorateReply: false,
 });
 // *---------Static files route------------ *//
