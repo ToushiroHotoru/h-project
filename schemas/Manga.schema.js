@@ -5,7 +5,7 @@ const MangaSchema = new Schema(
     title: { type: String, required: true },
     cover: { type: String, required: true },
     artist: { type: String, required: true },
-    series: { type: String, required: true },
+    series: { type: String },
     tags: [
       {
         type: Schema.Types.ObjectId,
@@ -17,7 +17,7 @@ const MangaSchema = new Schema(
     views: { type: Number, required: true, default: 0 },
     cycle: {
       name: { type: String },
-      part: { type: Number },
+      part: { type: Number, default: 1 },
     },
     pages: { type: Array, required: true },
   },

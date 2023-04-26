@@ -1,5 +1,7 @@
 const Manga = require("../schemas/Manga.schema");
 const mongoose = require("mongoose");
+const fs = require("fs");
+const path = require("path");
 
 const tags = [
   "63b2c36df0a695aa4ee12d27",
@@ -82,51 +84,135 @@ const mangaAppendService = async () => {
   }
 };
 
-const mangaAppendOneService = async () => {
-  const result = await Manga.add({
-    title: `Manga ${getRandomInt(1000)}`,
-    cover: `/manga_cover/cover_${getRandomInt(7) + 1}.jpg`,
-    artist: "Toushiro",
-    series: "Toushiro's saga",
-    tags: [
-      mongoose.Types.ObjectId(tags[getRandomInt(9)]),
-      mongoose.Types.ObjectId(tags[getRandomInt(9)]),
-      mongoose.Types.ObjectId(tags[getRandomInt(9)]),
-    ],
-    likes: getRandomInt(1000),
-    views: getRandomInt(10000),
-    cycle: {
-      name: "Neverland",
-      part: 1,
-    },
-    pages: [
-      "/test_manga_storage/1.jpg",
-      "/test_manga_storage/2.jpg",
-      "/test_manga_storage/3.jpg",
-      "/test_manga_storage/4.jpg",
-      "/test_manga_storage/5.jpg",
-      "/test_manga_storage/6.jpg",
-      "/test_manga_storage/7.jpg",
-      "/test_manga_storage/8.jpg",
-      "/test_manga_storage/9.jpg",
-      "/test_manga_storage/10.jpg",
-      "/test_manga_storage/11.jpg",
-      "/test_manga_storage/12.jpg",
-      "/test_manga_storage/13.jpg",
-      "/test_manga_storage/14.jpg",
-      "/test_manga_storage/15.jpg",
-      "/test_manga_storage/16.jpg",
-      "/test_manga_storage/17.jpg",
-      "/test_manga_storage/18.jpg",
-      "/test_manga_storage/19.jpg",
-      "/test_manga_storage/20.jpg",
-      "/test_manga_storage/21.jpg",
-      "/test_manga_storage/22.jpg",
-      "/test_manga_storage/23.jpg",
-      "/test_manga_storage/24.jpg",
-    ],
-  });
-  return result;
+const mangaAppendOneService = async (params) => {
+  if (params) {
+    const pages = [];
+    const mangaRoute = "/upload/mangas";
+    const part = params.part || 1;
+
+    // console.log(
+    //   fs.opendirSync(
+    //     path.resolve(
+    //       __dirname,
+    //       "../upload/mangas",
+    //       params.title.toLowerCase().replace(/ /gi, "_")
+    //     )
+    //   )
+    // );
+    // for (let i = 0; i < pathsToCheck.length; i++) {
+    // fs.stat(
+    //   path.resolve(
+    //     __dirname,
+    //     "../upload/mangas",
+    //     params.title.toLowerCase().replace(/ /gi, "_")
+    //   ),
+    //   (err, stats) => {
+    //     console.log(stats.isDirectory());
+    //     console.log(stats);
+    //   }
+    // );
+    // }
+
+    fs.mkdirSync(
+      path.resolve(
+        __dirname,
+        "../upload/mangas",
+        params.title.toLowerCase().replace(/ /gi, "_"),
+        part.toString()
+      ),
+      {
+        recursive: true,
+      }
+    );
+    fs.mkdirSync(
+      path.resolve(
+        __dirname,
+        "../upload/covers",
+        params.title.toLowerCase().replace(/ /gi, "_")
+      ),
+      {
+        recursive: true,
+      }
+    );
+    console.log(
+      path.join(
+        mangaRoute,
+        params.title.toLowerCase().replace(/ /gi, "_"),
+        part.toString()
+      )
+    );
+    for (let i = 0; i <= Number(params.pages); i++) {
+      pages.push(
+        `${mangaRoute}/${params.title
+          .toLowerCase()
+          .replace(/ /gi, "_")}/${part}/${i}.jpg`
+      );
+    }
+
+    const result = await Manga.add({
+      title: params.title,
+      cover: `/upload/covers/${params.title.toLowerCase()}/${params.title.toLowerCase()}.jpg`,
+      artist: params.artist,
+      series: "",
+      tags: [
+        mongoose.Types.ObjectId(tags[getRandomInt(9)]),
+        mongoose.Types.ObjectId(tags[getRandomInt(9)]),
+        mongoose.Types.ObjectId(tags[getRandomInt(9)]),
+      ],
+      likes: 0,
+      views: 0,
+      cycle: {
+        name: params.cycle,
+        part: part,
+      },
+      pages: pages,
+    });
+    return result;
+  }
+  // const result = await Manga.add({
+  //   title: `Manga ${getRandomInt(1000)}`,
+  //   cover: `/manga_cover/cover_${getRandomInt(7) + 1}.jpg`,
+  //   artist: "Toushiro",
+  //   series: "Toushiro's saga",
+  //   tags: [
+  //     mongoose.Types.ObjectId(tags[getRandomInt(9)]),
+  //     mongoose.Types.ObjectId(tags[getRandomInt(9)]),
+  //     mongoose.Types.ObjectId(tags[getRandomInt(9)]),
+  //   ],
+  //   likes: getRandomInt(1000),
+  //   views: getRandomInt(10000),
+  //   cycle: {
+  //     name: "Neverland",
+  //     part: 1,
+  //   },
+  //   pages: [
+  //     "/test_manga_storage/1.jpg",
+  //     "/test_manga_storage/2.jpg",
+  //     "/test_manga_storage/3.jpg",
+  //     "/test_manga_storage/4.jpg",
+  //     "/test_manga_storage/5.jpg",
+  //     "/test_manga_storage/6.jpg",
+  //     "/test_manga_storage/7.jpg",
+  //     "/test_manga_storage/8.jpg",
+  //     "/test_manga_storage/9.jpg",
+  //     "/test_manga_storage/10.jpg",
+  //     "/test_manga_storage/11.jpg",
+  //     "/test_manga_storage/12.jpg",
+  //     "/test_manga_storage/13.jpg",
+  //     "/test_manga_storage/14.jpg",
+  //     "/test_manga_storage/15.jpg",
+  //     "/test_manga_storage/16.jpg",
+  //     "/test_manga_storage/17.jpg",
+  //     "/test_manga_storage/18.jpg",
+  //     "/test_manga_storage/19.jpg",
+  //     "/test_manga_storage/20.jpg",
+  //     "/test_manga_storage/21.jpg",
+  //     "/test_manga_storage/22.jpg",
+  //     "/test_manga_storage/23.jpg",
+  //     "/test_manga_storage/24.jpg",
+  //   ],
+  // });
+  // return result;
 };
 
 module.exports = {
