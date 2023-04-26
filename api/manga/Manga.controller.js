@@ -2,7 +2,11 @@ const chalk = require("chalk");
 const Manga = require("../../schemas/Manga.schema.js");
 const MangaService = require("../../service/Manga.service");
 const mongoose = require("mongoose");
-
+const dayjs = require("dayjs");
+const LINK =
+  process.env.NODE_ENV !== "development"
+    ? "https://h-project.toushirohotoru.repl.co"
+    : "http://localhost:8080";
 class MangaController {
   async getAllMangas(request, reply) {
     try {
@@ -24,6 +28,13 @@ class MangaController {
         tags ? tags.split("%2C") : null
       );
 
+      mangas = JSON.parse(JSON.stringify(mangas));
+      mangas = mangas.map((item) => {
+        const pages = item.pages.map((page) => {
+          return LINK + page;
+        });
+        return { ...item, cover: LINK + item.cover, pages: pages, createdAt: dayjs(item.createdAt).format('DD.MM.YYYY') };
+      });
       if (tags) {
         total = mangas.length;
       }
@@ -65,7 +76,9 @@ class MangaController {
   async getStatic(request, reply) {
     try {
       const id = request.query.id;
-      const manga = await Manga.getStaticFields(id);
+      let manga = await Manga.getStaticFields(id);
+      manga = JSON.parse(JSON.stringify(manga));
+      manga = { ...manga, cover: LINK + manga.cover };
       reply.code(200).send(manga);
     } catch (err) {
       console.log(`manga error - ${chalk.red(err)}`);
@@ -75,7 +88,12 @@ class MangaController {
   async getDynamic(request, reply) {
     try {
       const id = request.query.id;
-      const manga = await Manga.getDynamicFields(id);
+      let manga = await Manga.getDynamicFields(id);
+      const pages = manga.pages.map((item) => {
+        return LINK + item;
+      });
+      manga = JSON.parse(JSON.stringify(manga));
+      manga = { ...manga, pages: pages };
       reply.code(200).send(manga);
     } catch (err) {
       console.log(`manga error - ${chalk.red(err)}`);
@@ -93,7 +111,8 @@ class MangaController {
 
   async mangaAppendOne(request, reply) {
     try {
-      const result = await MangaService.mangaAppendOneService();
+      console.log(request.body);
+      const result = await MangaService.mangaAppendOneService(request.body);
       console.log(result);
       reply.code(200).send({ msg: `manga was written ${result._id}` });
     } catch (err) {
@@ -103,11 +122,15 @@ class MangaController {
 
   async newMangas(req, reply) {
     try {
-      const manga = await Manga.find({})
+      let manga = await Manga.find({})
         .sort({ createdAt: "desc" })
         .select("_id title cover")
         .limit(8)
         .lean();
+      manga = manga.map((item) => {
+        return { ...item, cover: LINK + item.cover };
+      });
+      console.log(manga);
       reply.code(200).send({ manga: manga });
     } catch (error) {}
   }
