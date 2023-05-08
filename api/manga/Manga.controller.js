@@ -1,4 +1,4 @@
-const chalk = require("chalk");
+// const chalk = require("chalk");
 const Manga = require("../../schemas/Manga.schema.js");
 const MangaService = require("../../service/Manga.service");
 const mongoose = require("mongoose");
@@ -20,7 +20,6 @@ class MangaController {
       if (!reg.test(page) || page - 1 < 0 || page - 1 > total / 24) {
         reply.status(500).send({ message: "задана не верная страница" });
       }
-      console.log(request.query)
 
       mangas = await MangaService.mangaSort(
         sort,

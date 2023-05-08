@@ -1,7 +1,7 @@
 const fastify = require("fastify")({ logger: true });
 const cors = require("@fastify/cors");
 const fastifyStatic = require("@fastify/static");
-const chalk = require("chalk");
+// const chalk = require("chalk");
 const path = require("path");
 
 const PORT = process.env.PORT || 8080;
