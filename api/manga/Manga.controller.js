@@ -42,7 +42,7 @@ class MangaController {
 
       reply.code(200).send({ total, offset, step, mangas });
     } catch (err) {
-      console.log(`Manga sort error - ${chalk.red(err)}`);
+      // console.log(`Manga sort error - ${chalk.red(err)}`);
     }
   }
 
@@ -51,7 +51,7 @@ class MangaController {
       const mangas = await Manga.getAllMangasId();
       reply.code(200).send(mangas);
     } catch (error) {
-      console.log(chalk.red(error));
+      // console.log(chalk.red(error));
     }
   }
 
@@ -61,7 +61,7 @@ class MangaController {
       await Manga.deleteOne({ _id: id });
       reply.code(200).send({ msg: `manga by id - '${id}' was deleted` });
     } catch (err) {
-      console.log(`manga error - ${chalk.red(err)}`);
+      // console.log(`manga error - ${chalk.red(err)}`);
     }
   }
 
@@ -70,7 +70,7 @@ class MangaController {
       await Manga.deleteMany({});
       reply.code(200).send({ msg: "all mangas was deleted" });
     } catch (err) {
-      console.log(`manga error - ${chalk.red(err)}`);
+      // console.log(`manga error - ${chalk.red(err)}`);
     }
   }
 
@@ -82,7 +82,7 @@ class MangaController {
       manga = { ...manga, cover: LINK + manga.cover };
       reply.code(200).send(manga);
     } catch (err) {
-      console.log(`manga error - ${chalk.red(err)}`);
+      // console.log(`manga error - ${chalk.red(err)}`);
     }
   }
 
@@ -97,7 +97,7 @@ class MangaController {
       manga = { ...manga, pages: pages };
       reply.code(200).send(manga);
     } catch (err) {
-      console.log(`manga error - ${chalk.red(err)}`);
+      // console.log(`manga error - ${chalk.red(err)}`);
     }
   }
 
@@ -106,7 +106,7 @@ class MangaController {
       MangaService.mangaAppendService();
       reply.code(200).send({ msg: "72 records created" });
     } catch (err) {
-      console.log(`New user error - ${chalk.red(err)}`);
+      // console.log(`New user error - ${chalk.red(err)}`);
     }
   }
 
@@ -117,7 +117,7 @@ class MangaController {
       console.log(result);
       reply.code(200).send({ msg: `manga was written ${result._id}` });
     } catch (err) {
-      console.log(`New user error - ${chalk.red(err)}`);
+      // console.log(`New user error - ${chalk.red(err)}`);
     }
   }
 

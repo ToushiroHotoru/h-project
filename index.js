@@ -63,7 +63,7 @@ fastify.register(require("./routes/routes.js"));
 const start = async () => {
   try {
     await fastify.listen({ port: PORT, host: HOST });
-    console.log(chalk.blue(`Server started - http://${HOST}:${PORT}`));
+    // console.log(chalk.blue(`Server started - http://${HOST}:${PORT}`));
   } catch (err) {
     fastify.log.error(err);
     process.exit(1);
