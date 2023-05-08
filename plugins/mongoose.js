@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-const chalk = require("chalk");
+// const chalk = require("chalk");
 
 async function mongooseInit(fastify, opts, done) {
   try {

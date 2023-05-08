@@ -43,7 +43,7 @@ class TagsController {
             })
           );
           console.log(result, "BBBBBBBB");
-          reply.code(200).send({ tags: result.filter(item => item["count"] != 0) });
+          return reply.code(200).send({ tags: result.filter(item => item["count"] != 0) });
         }
 
         let result = await Promise.all(
@@ -52,7 +52,7 @@ class TagsController {
             return { id: item["_id"], name: item["name"], count: count };
           })
         );
-        reply.code(200).send({ tags: result.filter(item => item["count"] != 0) });
+        return reply.code(200).send({ tags: result.filter(item => item["count"] != 0) });
       }
 
       const tagsNotFiltered = await Promise.all(
