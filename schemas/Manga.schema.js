@@ -33,6 +33,7 @@ MangaSchema.statics.getAllMangasId = function () {
 };
 
 MangaSchema.statics.sortByTime = function (offset, step, tags) {
+  console.log("1- " + tags);
   if (!tags) {
     return this.find({})
       .sort({ createdAt: "desc" })
@@ -58,6 +59,7 @@ MangaSchema.statics.sortByTime = function (offset, step, tags) {
 };
 
 MangaSchema.statics.sortByAlphabet = function (offset, step, tags) {
+  console.log("2- " + tags);
   if (!tags) {
     return this.find({})
       .collation({ locale: "en", strength: 2 })
