@@ -1,7 +1,7 @@
 const Avatar = require("../../schemas/Avatars.schema");
 const LINK =
   process.env.NODE_ENV !== "development"
-    ? "https://h-project.toushirohotoru.repl.co"
+    ? "http://h-project.toushirohotoru.repl.co"
     : "http://localhost:8080";
 
 class AvatarController {

@@ -5,7 +5,7 @@ const Avatar = require("../../schemas/Avatars.schema");
 const daysjs = require("dayjs");
 const LINK =
   process.env.NODE_ENV !== "development"
-    ? "https://h-project.toushirohotoru.repl.co"
+    ? "http://h-project.toushirohotoru.repl.co"
     : "http://localhost:8080";
 class CommentsController {
   async addComment(request, reply) {
