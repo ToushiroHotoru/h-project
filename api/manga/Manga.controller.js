@@ -10,7 +10,8 @@ const LINK =
 class MangaController {
   async getAllMangas(request, reply) {
     try {
-      const { page, sort, tags } = request.query;
+      const { page, sort } = request.query;
+      const tags = request.query["tags[]"];
       const reg = new RegExp("^[0-9]+$");
       const step = 24;
       const offset = step * (page - 1);
@@ -20,20 +21,20 @@ class MangaController {
       if (!reg.test(page) || page - 1 < 0 || page - 1 > total / 24) {
         reply.status(500).send({ message: "задана не верная страница" });
       }
-
-      mangas = await MangaService.mangaSort(
-        sort,
-        offset,
-        step,
-        tags ? tags.split(",") : null
-      );
+      console.log(request.query);
+      mangas = await MangaService.mangaSort(sort, offset, step, tags);
 
       mangas = JSON.parse(JSON.stringify(mangas));
       mangas = mangas.map((item) => {
         const pages = item.pages.map((page) => {
           return LINK + page;
         });
-        return { ...item, cover: LINK + item.cover, pages: pages, createdAt: dayjs(item.createdAt).format('DD.MM.YYYY') };
+        return {
+          ...item,
+          cover: LINK + item.cover,
+          pages: pages,
+          createdAt: dayjs(item.createdAt).format("DD.MM.YYYY"),
+        };
       });
       if (tags) {
         total = mangas.length;
