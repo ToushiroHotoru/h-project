@@ -16,7 +16,7 @@ class TagsController {
   async getTagsCount(request, reply) {
     try {
       let selectedTags = request.query?.tags
-        ? request.query.tags.split("%2C")
+        ? request.query.tags.split(",")
         : [];
       let tags2 = await Tags.getAll();
       console.log(selectedTags, selectedTags.length);

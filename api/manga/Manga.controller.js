@@ -20,12 +20,13 @@ class MangaController {
       if (!reg.test(page) || page - 1 < 0 || page - 1 > total / 24) {
         reply.status(500).send({ message: "задана не верная страница" });
       }
+      console.log(request.query)
 
       mangas = await MangaService.mangaSort(
         sort,
         offset,
         step,
-        tags ? tags.split("%2C") : null
+        tags ? tags.split(",") : null
       );
 
       mangas = JSON.parse(JSON.stringify(mangas));
