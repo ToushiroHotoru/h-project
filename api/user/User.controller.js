@@ -204,10 +204,10 @@ class UserController {
 
   async setPreferencesTags(request, reply) {
     try {
-      const { preferencesTags, id } = JSON.parse(request.body);
-      console.log(preferencesTags, id);
-      if (preferencesTags.length) {
-        await User.setPreferencesTags({ preferencesTags, id });
+      const { tags, id } = JSON.parse(request.body);
+      console.log(tags, id);
+      if (tags.length) {
+        await User.setPreferencesTags({ tags, id });
       }
       reply.code(200).send({ success: true });
     } catch (err) {
@@ -218,8 +218,8 @@ class UserController {
 
   async setExceptionsTags(request, reply) {
     try {
-      const { exceptionsTags, id } = JSON.parse(request.body);
-      await User.setExceptionsTags({ exceptionsTags, id });
+      const { tags, id } = JSON.parse(request.body);
+      await User.setExceptionsTags({ tags, id });
       reply.code(200);
     } catch (err) {
       console.log(err.message);
