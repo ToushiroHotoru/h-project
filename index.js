@@ -60,16 +60,14 @@ fastify.register(require("@fastify/auth"));
 fastify.register(require("./routes/routes.js"));
 // *---------Rooutes------------ *//
 
-// const start = async () => {
-//   try {
-//     await fastify.listen({ port: PORT, host: HOST });
-//     // console.log(chalk.blue(`Server started - http://${HOST}:${PORT}`));
-//   } catch (err) {
-//     fastify.log.error(err);
-//     process.exit(1);
-//   }
-// };
+const start = async () => {
+  try {
+    await fastify.listen({ port: PORT, host: HOST });
+    // console.log(chalk.blue(`Server started - http://${HOST}:${PORT}`));
+  } catch (err) {
+    fastify.log.error(err);
+    process.exit(1);
+  }
+};
 
-// start();
-
-module.exports = app;
+start();
