@@ -5,7 +5,7 @@ const mongoose = require("mongoose");
 const dayjs = require("dayjs");
 const LINK =
   process.env.NODE_ENV !== "development"
-    ? "http://h-project.toushirohotoru.repl.co"
+    ? "https://api.h-project.fun"
     : "http://localhost:8080";
 class MangaController {
   async getAllMangas(request, reply) {
