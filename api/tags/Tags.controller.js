@@ -1,5 +1,9 @@
 const Tags = require("../../schemas/Tags.schema");
 const Manga = require("../../schemas/Manga.schema");
+const LINK =
+  process.env.NODE_ENV !== "development"
+    ? "https://api.h-project.fun"
+    : "http://localhost:8080";
 
 class TagsController {
   async addTags(request, reply) {
@@ -19,7 +23,7 @@ class TagsController {
         ? request.query.tags.split(",")
         : [];
       let tags2 = await Tags.getAll();
-      console.log(selectedTags, selectedTags.length);
+      // console.log(selectedTags, selectedTags.length);
 
       if (selectedTags.length) {
         const unselectedTags = await Tags.find({
@@ -29,11 +33,10 @@ class TagsController {
           tags: { $all: [...selectedTags] },
         });
 
-        console.log("works 1");
+        // console.log("works 1");
 
         if (Array.isArray(selectedTags)) {
-
-          console.log("works 2");
+          // console.log("works 2");
           let result = await Promise.all(
             unselectedTags.map(async (item) => {
               let count = await Manga.find({
@@ -42,8 +45,10 @@ class TagsController {
               return { id: item["_id"], name: item["name"], count: count };
             })
           );
-          console.log(result, "BBBBBBBB");
-          return reply.code(200).send({ tags: result.filter(item => item["count"] != 0) });
+          // console.log(result, "BBBBBBBB");
+          return reply
+            .code(200)
+            .send({ tags: result.filter((item) => item["count"] != 0) });
         }
 
         let result = await Promise.all(
@@ -52,7 +57,9 @@ class TagsController {
             return { id: item["_id"], name: item["name"], count: count };
           })
         );
-        return reply.code(200).send({ tags: result.filter(item => item["count"] != 0) });
+        return reply
+          .code(200)
+          .send({ tags: result.filter((item) => item["count"] != 0) });
       }
 
       const tagsNotFiltered = await Promise.all(
@@ -69,7 +76,6 @@ class TagsController {
   }
 
   async getAllTags(request, reply) {
-    // console.log(request.query.tags, "AAAAAAAAAAAAA");
     let selectedTags = request.query.tags;
     let tags = await Tags.getAll();
     if (selectedTags) {
@@ -94,6 +100,15 @@ class TagsController {
     });
 
     tags = await Tags.getAll();
+    tags = tags.map((tag) => {
+      return {
+        ...tag,
+        image: LINK + tag.image,
+        miniImage: LINK + tag.miniImage,
+      };
+    });
+
+    // console.log(tags);
 
     reply.code(200).send({ tags });
   }
