@@ -32,59 +32,93 @@ MangaSchema.statics.getAllMangasId = function () {
   return this.find({}).select("_id");
 };
 
-MangaSchema.statics.sortByTime = function (offset, step, tags) {
-  console.log("1- " + tags);
+MangaSchema.statics.sortByTime = async function (offset, step, tags) {
   if (!tags) {
-    return this.find({})
-      .sort({ createdAt: "desc" })
-      .skip(offset)
-      .limit(step)
-      .populate("tags")
-      .exec();
+    return {
+      mangas: await this.find({})
+        .sort({ createdAt: "desc" })
+        .skip(offset)
+        .limit(step)
+        .populate("tags")
+        .lean()
+        .exec(),
+      total: await this.find({}).count().exec(),
+    };
   }
   if (Array.isArray(tags)) {
-    return this.find({ tags: { $all: [...tags] } })
+    return {
+      mangas: await this.find({ tags: { $all: [...tags] } })
+        .sort({ createdAt: "desc" })
+        .skip(offset)
+        .limit(step)
+        .populate("tags")
+        .lean()
+        .exec(),
+      total: await this.find({ tags: { $all: [...tags] } })
+        .count()
+        .exec(),
+    };
+  }
+  return {
+    mangas: await this.find({ tags: tags })
       .sort({ createdAt: "desc" })
       .skip(offset)
       .limit(step)
       .populate("tags")
-      .exec();
-  }
-  return this.find({ tags: tags })
-    .sort({ createdAt: "desc" })
-    .skip(offset)
-    .limit(step)
-    .populate("tags")
-    .exec();
+      .lean()
+      .exec(),
+    total: await this.find({ tags: tags }).count().exec(),
+  };
 };
 
-MangaSchema.statics.sortByAlphabet = function (offset, step, tags) {
-  console.log("2- " + tags);
+MangaSchema.statics.sortByAlphabet = async function (offset, step, tags) {
   if (!tags) {
-    return this.find({})
-      .collation({ locale: "en", strength: 2 })
-      .sort({ title: 1 })
-      .skip(offset)
-      .limit(step)
-      .populate("tags")
-      .exec();
+    return {
+      mangas: await this.find({})
+        .collation({ locale: "en", strength: 2 })
+        .sort({ title: 1 })
+        .skip(offset)
+        .limit(step)
+        .populate("tags")
+        .lean()
+        .exec(),
+      total: await this.find({})
+        .collation({ locale: "en", strength: 2 })
+        .sort({ title: 1 })
+        .count()
+        .exec(),
+    };
   }
   if (Array.isArray(tags)) {
-    return this.find({ tags: { $all: [...tags] } })
+    return {
+      mangas: await this.find({ tags: { $all: [...tags] } })
+        .collation({ locale: "en", strength: 2 })
+        .sort({ title: 1 })
+        .skip(offset)
+        .limit(step)
+        .populate("tags")
+        .lean(),
+      total: await this.find({ tags: { $all: [...tags] } })
+        .collation({ locale: "en", strength: 2 })
+        .sort({ title: 1 })
+        .count()
+        .exec(),
+    };
+  }
+  return {
+    mangas: await this.find({ tags: tags })
       .collation({ locale: "en", strength: 2 })
       .sort({ title: 1 })
       .skip(offset)
       .limit(step)
       .populate("tags")
-      .exec();
-  }
-  return this.find({ tags: tags })
-    .collation({ locale: "en", strength: 2 })
-    .sort({ title: 1 })
-    .skip(offset)
-    .limit(step)
-    .populate("tags")
-    .exec();
+      .lean(),
+    total: await this.find({ tags: tags })
+      .collation({ locale: "en", strength: 2 })
+      .sort({ title: 1 })
+      .count()
+      .exec(),
+  };
 };
 
 MangaSchema.statics.getStaticFields = function (id) {
@@ -100,10 +134,8 @@ MangaSchema.statics.getStaticFields = function (id) {
 MangaSchema.statics.getDynamicFields = function (id) {
   return this.findById(id)
     .select(["-title", "-cover", "-artist", "-series", "-cycle"])
-    .populate({
-      path: "tags",
-    })
-    .exec();
+    .populate("tags")
+    .lean();
 };
 
 module.exports = model("Manga", MangaSchema);

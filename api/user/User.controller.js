@@ -77,7 +77,6 @@ class UserController {
       reply
         .setCookie("refreshToken", tokens.refreshToken, {
           path: "/",
-          httpOnly: true,
           secure: process.env.NODE_ENV === "production" ? true : false,
         })
         .setCookie("accessToken", tokens.accessToken, {
@@ -86,8 +85,8 @@ class UserController {
         })
         .code(200)
         .send({
-          success: true,
           accessToken: tokens.accessToken,
+          refreshToken: tokens.refreshToken,
           user: {
             id: user._id,
             userName: user.username,
@@ -106,7 +105,6 @@ class UserController {
       reply
         .clearCookie("refreshToken", {
           path: "/",
-          httpOnly: true,
         })
         .code(200)
         .send({ success: true });
@@ -157,7 +155,6 @@ class UserController {
       reply
         .setCookie("refreshToken", tokens.refreshToken, {
           path: "/",
-          httpOnly: true,
           secure: process.env.NODE_ENV === "production" ? true : false,
         })
         .setCookie("accessToken", tokens.accessToken, {
@@ -167,6 +164,7 @@ class UserController {
         .code(200)
         .send({
           accessToken: tokens.accessToken,
+          refreshToken: tokens.refreshToken,
           user: {
             id: userData._id,
             userName: userData.username,

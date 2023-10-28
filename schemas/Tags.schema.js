@@ -54,7 +54,7 @@ tagsSchema.statics.deleteAll = function () {
 };
 
 tagsSchema.statics.getAll = function () {
-  return this.find({});
+  return this.find({}).lean();
 };
 
 module.exports = model("Tags", tagsSchema);

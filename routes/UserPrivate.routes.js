@@ -5,18 +5,13 @@ async function UserPrivateRoutes(fastify, options) {
   fastify
     .decorate("verifyJwt", async function (request, reply) {
       try {
-        const authHeader = request.headers.authorization;
+        const token = request.cookies.accessToken;
 
-        if (!authHeader) {
+        if (!token) {
           return reply.code(401).send({ error: "No token was sent" });
         }
 
-        const bearerToken = authHeader.split(" ")[1];
-        if (!bearerToken) {
-          return reply.code(401).send({ error: "Token not found" });
-        }
-
-        const userData = await TokenService.verifyAccessToken(bearerToken);
+        const userData = await TokenService.verifyAccessToken(token);
 
         request.user = userData;
       } catch (error) {
