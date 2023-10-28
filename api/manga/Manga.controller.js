@@ -11,38 +11,50 @@ class MangaController {
   async getAllMangas(request, reply) {
     try {
       const { page, sort } = request.query;
-      const tags = request.query["tags[]"];
+      console.log(request.query["tags"]);
+      const tags = request.query["tags"]
+        ? request.query["tags"].split(",")
+        : "";
       const reg = new RegExp("^[0-9]+$");
       const step = 24;
       const offset = step * (page - 1);
-      let total = await Manga.count();
-      let mangas = null;
+      const mangaTotal = await Manga.count();
 
-      if (!reg.test(page) || page - 1 < 0 || page - 1 > total / 24) {
-        reply.status(500).send({ message: "задана не верная страница" });
+      if (!reg.test(page) || page - 1 < 0 || page - 1 > mangaTotal / 24) {
+        reply
+          .status(404)
+          .send({ message: "задана не верная страница", total: 0, mangas: [] });
       }
-      console.log(request.query);
-      mangas = await MangaService.mangaSort(sort, offset, step, tags);
+      let mangasService = await MangaService.mangaSort(
+        sort,
+        offset,
+        step,
+        tags
+      );
 
-      mangas = JSON.parse(JSON.stringify(mangas));
-      mangas = mangas.map((item) => {
+      const mangas = mangasService.mangas.map((item) => {
         const pages = item.pages.map((page) => {
           return LINK + page;
+        });
+        const tags = item.tags.map((tag) => {
+          return {
+            ...tag,
+            image: LINK + tag.image,
+            miniImage: LINK + tag.miniImage,
+          };
         });
         return {
           ...item,
           cover: LINK + item.cover,
           pages: pages,
+          tags: tags,
           createdAt: dayjs(item.createdAt).format("DD.MM.YYYY"),
         };
       });
-      if (tags) {
-        total = mangas.length;
-      }
-
+      const total = mangasService.total;
       reply.code(200).send({ total, offset, step, mangas });
     } catch (err) {
-      // console.log(`Manga sort error - ${chalk.red(err)}`);
+      console.log(err);
     }
   }
 
@@ -94,7 +106,18 @@ class MangaController {
         return LINK + item;
       });
       manga = JSON.parse(JSON.stringify(manga));
-      manga = { ...manga, pages: pages };
+      manga = {
+        ...manga,
+        pages: pages,
+        tags: manga.tags.map((tag) => {
+          return {
+            ...tag,
+            image: LINK + tag.image,
+            miniImage: LINK + tag.miniImage,
+          };
+        }),
+      };
+
       reply.code(200).send(manga);
     } catch (err) {
       // console.log(`manga error - ${chalk.red(err)}`);
