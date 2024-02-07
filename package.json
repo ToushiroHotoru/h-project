@@ -19,6 +19,7 @@
 		"cross-env": "^7.0.3",
 		"dayjs": "^1.11.7",
 		"fastify": "^4.7.0",
+		"image-size": "^1.1.1",
 		"jsonwebtoken": "^9.0.0",
 		"mongoose": "^6.6.5",
 		"nodemon": "^2.0.20"
