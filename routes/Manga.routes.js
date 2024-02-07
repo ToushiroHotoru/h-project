@@ -18,6 +18,8 @@ async function MangaRoutes(fastify, options) {
   fastify.delete("/delete-many", MangaController.deleteMangaAll);
 
   fastify.get("/new_manga", MangaController.newMangas);
+
+  fastify.get("/reader-manga-by-id", MangaController.getMangaForReader);
 }
 
 module.exports = MangaRoutes;

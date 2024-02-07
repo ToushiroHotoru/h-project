@@ -5,7 +5,7 @@ async function UserPrivateRoutes(fastify, options) {
   fastify
     .decorate("verifyJwt", async function (request, reply) {
       try {
-        const token = request.cookies.accessToken;
+        const token = request.headers.authorization.split(" ")[1];
 
         if (!token) {
           return reply.code(401).send({ error: "No token was sent" });
@@ -28,7 +28,7 @@ async function UserPrivateRoutes(fastify, options) {
       });
 
       fastify.route({
-        method: "DELETE",
+        method: "POST",
         url: "/logout",
         preHandler: fastify.auth([fastify.verifyJwt]),
         handler: UserController.logoutUser,

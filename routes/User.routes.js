@@ -1,19 +1,19 @@
 const UserController = require("../api/user/User.controller");
 
 async function UserRoutes(fastify, options) {
-  fastify.post("/registration", UserController.registerUser);
+  fastify.post("/api/registration", UserController.registerUser);
 
-  fastify.post("/login", UserController.loginUser);
+  fastify.post("/api/login", UserController.loginUser);
 
-  fastify.post("/set_preferences_tags", UserController.setPreferencesTags);
+  fastify.post("/api/set_preferences_tags", UserController.setPreferencesTags);
 
-  fastify.post("/set_exceptions_tags", UserController.setExceptionsTags);
+  fastify.post("/api/set_exceptions_tags", UserController.setExceptionsTags);
 
-  fastify.post("/set_avatar", UserController.setAvatar);
+  fastify.post("/api/set_avatar", UserController.setAvatar);
 
-  fastify.get("/refresh", UserController.refresh);
+  fastify.get("/api/refresh", UserController.refresh);
 
-  fastify.get("/user", UserController.userProfile);
+  fastify.get("/api/user", UserController.userProfile);
 }
 
 module.exports = UserRoutes;
