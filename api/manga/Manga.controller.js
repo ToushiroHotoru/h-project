@@ -1,12 +1,12 @@
 // const chalk = require("chalk");
+const dayjs = require("dayjs");
+const sizeOf = require("image-size");
+const path = require("path");
+
 const Manga = require("../../schemas/Manga.schema.js");
 const MangaService = require("../../service/Manga.service");
-const mongoose = require("mongoose");
-const dayjs = require("dayjs");
-const LINK =
-  process.env.NODE_ENV !== "development"
-    ? "https://api.h-project.fun"
-    : "http://localhost:8080";
+const LINK = require("../../utils/API_URL.js");
+
 class MangaController {
   async getAllMangas(request, reply) {
     try {
@@ -95,6 +95,28 @@ class MangaController {
       reply.code(200).send(manga);
     } catch (err) {
       // console.log(`manga error - ${chalk.red(err)}`);
+    }
+  }
+
+  async getMangaForReader(request, reply) {
+    try {
+      const id = request.query.id;
+      let manga = await Manga.getMangaPages(id);
+
+      const pages = manga.pages.map((item) => {
+        return {
+          size: sizeOf(process.cwd() + item),
+          image: LINK + item,
+        };
+      });
+      manga = {
+        ...manga,
+        pages: pages,
+      };
+
+      reply.code(200).send(manga);
+    } catch (err) {
+      reply.code(500).send(err);
     }
   }
 

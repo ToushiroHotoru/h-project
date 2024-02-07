@@ -121,6 +121,85 @@ MangaSchema.statics.sortByAlphabet = async function (offset, step, tags) {
   };
 };
 
+MangaSchema.statics.sortByLikes = async function (offset, step, tags) {
+  if (!tags) {
+    return {
+      mangas: await this.find({})
+        .sort({ likes: "desc" })
+        .skip(offset)
+        .limit(step)
+        .populate("tags")
+        .lean()
+        .exec(),
+      total: await this.find({}).count().exec(),
+    };
+  }
+  if (Array.isArray(tags)) {
+    return {
+      mangas: await this.find({ tags: { $all: [...tags] } })
+        .sort({ likes: "desc" })
+        .skip(offset)
+        .limit(step)
+        .populate("tags")
+        .lean()
+        .exec(),
+      total: await this.find({ tags: { $all: [...tags] } })
+        .count()
+        .exec(),
+    };
+  }
+  return {
+    mangas: await this.find({ tags: tags })
+      .sort({ likes: "desc" })
+      .skip(offset)
+      .limit(step)
+      .populate("tags")
+      .lean()
+      .exec(),
+    total: await this.find({ tags: tags }).count().exec(),
+  };
+};
+
+MangaSchema.statics.sortByViews = async function (offset, step, tags) {
+  if (!tags) {
+    return {
+      mangas: await this.find({})
+        .sort({ views: "desc" })
+        .skip(offset)
+        .limit(step)
+        .populate("tags")
+        .lean()
+        .exec(),
+      total: await this.find({}).count().exec(),
+    };
+  }
+  if (Array.isArray(tags)) {
+    return {
+      mangas: await this.find({ tags: { $all: [...tags] } })
+        .sort({ views: "desc" })
+        .skip(offset)
+        .limit(step)
+        .populate("tags")
+        .lean()
+        .exec(),
+      total: await this.find({ tags: { $all: [...tags] } })
+        .count()
+        .exec(),
+    };
+  }
+  return {
+    mangas: await this.find({ tags: tags })
+      .sort({ views: "desc" })
+      .skip(offset)
+      .limit(step)
+      .populate("tags")
+      .lean()
+      .exec(),
+    total: await this.find({ tags: tags }).count().exec(),
+  };
+};
+
+
 MangaSchema.statics.getStaticFields = function (id) {
   return this.findById(id).select([
     "title",
@@ -136,6 +215,10 @@ MangaSchema.statics.getDynamicFields = function (id) {
     .select(["-title", "-cover", "-artist", "-series", "-cycle"])
     .populate("tags")
     .lean();
+};
+
+MangaSchema.statics.getMangaPages = function (id) {
+  return this.findById(id).select("title pages").lean();
 };
 
 module.exports = model("Manga", MangaSchema);
