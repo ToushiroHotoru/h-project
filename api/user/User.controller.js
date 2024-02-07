@@ -3,6 +3,7 @@ const bcrypt = require("bcryptjs");
 const User = require("../../schemas/User.schema");
 const Avatar = require("../../schemas/Avatars.schema");
 const TokenService = require("../../service/Token.service");
+const LINK = require("../../utils/API_URL");
 
 class UserController {
   constructor() {
@@ -67,6 +68,9 @@ class UserController {
           message: "Неправильный пароль",
         });
       }
+
+      const avatar = await Avatar.findById(user.avatar);
+
       const payload = {
         user: user._id,
         userType: user.userType,
@@ -77,10 +81,7 @@ class UserController {
       reply
         .setCookie("refreshToken", tokens.refreshToken, {
           path: "/",
-          secure: process.env.NODE_ENV === "production" ? true : false,
-        })
-        .setCookie("accessToken", tokens.accessToken, {
-          path: "/",
+          httpOnly: true,
           secure: process.env.NODE_ENV === "production" ? true : false,
         })
         .code(200)
@@ -90,6 +91,7 @@ class UserController {
           user: {
             id: user._id,
             userName: user.username,
+            avatar: LINK + avatar.image,
           },
         });
     } catch (error) {
@@ -155,10 +157,7 @@ class UserController {
       reply
         .setCookie("refreshToken", tokens.refreshToken, {
           path: "/",
-          secure: process.env.NODE_ENV === "production" ? true : false,
-        })
-        .setCookie("accessToken", tokens.accessToken, {
-          path: "/",
+          httpOnly: true,
           secure: process.env.NODE_ENV === "production" ? true : false,
         })
         .code(200)
@@ -175,8 +174,9 @@ class UserController {
     }
   }
 
-  async userProfile(requst, reply) {
-    const userDB = await User.findOne({ username: requst.query.username })
+  async userProfile(request, reply) {
+    
+    const userDB = await User.findOne({ username: request.query.username })
       .select(["username", "email", "preferencesTags", "exceptionsTags"])
       .lean();
 
