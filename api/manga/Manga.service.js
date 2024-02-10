@@ -45,6 +45,53 @@ const mangaSort = async (sort, offset, step, tags) => {
   return mangas;
 };
 
+const addNewMangaStatic = async () => {
+  for (let i = 0; i < 4; i++) {
+    await Manga.add({
+      title: `Manga ${i + 1}`,
+      cover: `/manga_cover/cover_${getRandomInt(7) + 1}.jpg`,
+      artist: "Toushiro",
+      series: "Toushiro's saga",
+      tags: [
+        mongoose.Types.ObjectId(tags[getRandomInt(9)]),
+        mongoose.Types.ObjectId(tags[getRandomInt(9)]),
+        mongoose.Types.ObjectId(tags[getRandomInt(9)]),
+      ],
+      likes: getRandomInt(1000),
+      views: getRandomInt(10000),
+      cycle: {
+        name: "Neverland",
+        part: 1,
+      },
+      pages: [
+        "/test_manga_storage/1.jpg",
+        "/test_manga_storage/2.jpg",
+        "/test_manga_storage/3.jpg",
+        "/test_manga_storage/4.jpg",
+        "/test_manga_storage/5.jpg",
+        "/test_manga_storage/6.jpg",
+        "/test_manga_storage/7.jpg",
+        "/test_manga_storage/8.jpg",
+        "/test_manga_storage/9.jpg",
+        "/test_manga_storage/10.jpg",
+        "/test_manga_storage/11.jpg",
+        "/test_manga_storage/12.jpg",
+        "/test_manga_storage/13.jpg",
+        "/test_manga_storage/14.jpg",
+        "/test_manga_storage/15.jpg",
+        "/test_manga_storage/16.jpg",
+        "/test_manga_storage/17.jpg",
+        "/test_manga_storage/18.jpg",
+        "/test_manga_storage/19.jpg",
+        "/test_manga_storage/20.jpg",
+        "/test_manga_storage/21.jpg",
+        "/test_manga_storage/22.jpg",
+        "/test_manga_storage/23.jpg",
+        "/test_manga_storage/24.jpg",
+      ],
+    });
+  }
+};
 const mangaAppendService = async () => {
   for (let i = 0; i < 72; i++) {
     await Manga.add({
@@ -120,13 +167,7 @@ const mangaAppendOneService = async (params) => {
         recursive: true,
       }
     );
-    console.log(
-      path.join(
-        mangaRoute,
-        params.title.toLowerCase().replace(/ /gi, "_"),
-        part.toString()
-      )
-    );
+
     for (let i = 0; i <= Number(params.pages); i++) {
       pages.push(
         `${mangaRoute}/${params.title
@@ -161,4 +202,5 @@ module.exports = {
   mangaSort,
   mangaAppendService,
   mangaAppendOneService,
+  addNewMangaStatic,
 };
