@@ -1,25 +1,42 @@
 const MangaController = require("./Manga.controller");
 
 async function MangaRoutes(fastify, options) {
-  fastify.get("/mangas", MangaController.getAllMangas);
+  fastify.get("/api/mangas", MangaController.getAllMangas);
 
-  fastify.get("/get_paths", MangaController.getMangasId);
+  fastify.get("/api/get_paths", MangaController.getMangasId);
 
-  fastify.post("/write", MangaController.mangaAppendOne);
+  fastify.post("/api/add_new_static_manga", MangaController.addNewMangasStatic);
 
-  fastify.post("/write-many", MangaController.mangaAppendMany);
+  fastify.post("/api/write", MangaController.mangaAppendOne);
 
-  fastify.get("/manga-static", MangaController.getStatic);
+  fastify.post("/api/write-many", MangaController.mangaAppendMany);
 
-  fastify.get("/manga-dynamic", MangaController.getDynamic);
+  fastify.get("/api/manga-static", MangaController.getStatic);
 
-  fastify.delete("/delete-one", MangaController.deleteMangaById);
+  fastify.get("/api/manga-dynamic", MangaController.getDynamic);
 
-  fastify.delete("/delete-many", MangaController.deleteMangaAll);
+  fastify.delete("/api/delete-one", MangaController.deleteMangaById);
 
-  fastify.get("/new_manga", MangaController.newMangas);
+  fastify.delete("/api/delete-many", MangaController.deleteMangaAll);
 
-  fastify.get("/reader-manga-by-id", MangaController.getMangaForReader);
+  fastify.get(
+    "/api/last_published_mangas",
+    MangaController.lastPublishedMangas
+  );
+
+  fastify.get(
+    "/api/last_most_viewed_mangas",
+    MangaController.mostViewedOnLastWeekMangas
+  );
+  fastify.get(
+    "/api/last_most_liked_mangas",
+    MangaController.mostLikedOnLastWeekMangas
+  );
+
+  fastify.get(
+    "/api/reader-manga-by-id",
+    MangaController.getMangaPagesForReader
+  );
 }
 
 module.exports = MangaRoutes;
