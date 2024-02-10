@@ -3,8 +3,8 @@ const dayjs = require("dayjs");
 const sizeOf = require("image-size");
 const path = require("path");
 
-const Manga = require("../../schemas/Manga.schema.js");
-const MangaService = require("../../service/Manga.service");
+const Manga = require("./Manga.schema.js");
+const MangaService = require("./Manga.service.js");
 const LINK = require("../../utils/API_URL.js");
 
 class MangaController {

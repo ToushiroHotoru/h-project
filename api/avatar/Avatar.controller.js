@@ -1,16 +1,23 @@
-const Avatar = require("../../schemas/Avatars.schema");
-const LINK =
-  process.env.NODE_ENV !== "development"
-    ? "http://h-project.toushirohotoru.repl.co"
-    : "http://localhost:8080";
+const Avatar = require("./Avatar.schema");
+const LINK = require("../../utils/API_URL");
 
 class AvatarController {
-  async getAvatars(request, reply) {
-    const avatars = await Avatar.find({ type: "site" }).lean();
-    const modified = avatars.map((item) => {
-      return { ...item, image: LINK + item.image };
-    });
-    reply.code(200).send({ avatars: modified });
+  async getSiteAvatars(request, reply) {
+    try {
+      const avatars = await Avatar.getsSiteAvatars();
+      const modifiedAvatars = avatars.map((item) => {
+        return { ...item, image: LINK + item.image };
+      });
+      reply.code(200).send({
+        status: "success",
+        data: { avatars: modifiedAvatars },
+      });
+    } catch (error) {
+      reply.code(500).send({
+        status: "error",
+        errors: [{ error }],
+      });
+    }
   }
 
   async setSiteAvatar(request, reply) {

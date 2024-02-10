@@ -1,9 +1,6 @@
-const Tags = require("../../schemas/Tags.schema");
-const Manga = require("../../schemas/Manga.schema");
-const LINK =
-  process.env.NODE_ENV !== "development"
-    ? "https://api.h-project.fun"
-    : "http://localhost:8080";
+const Tags = require("./Tags.schema");
+const Manga = require("../manga/Manga.schema");
+const LINK = require("../../utils/API_URL");
 
 class TagsController {
   async addTags(request, reply) {

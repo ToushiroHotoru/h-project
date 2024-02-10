@@ -1,5 +1,5 @@
-const UserController = require("../api/user/User.controller");
-const TokenService = require("../service/Token.service");
+const UserController = require("./User.controller");
+const TokenService = require("../../service/Token.service");
 
 async function UserPrivateRoutes(fastify, options) {
   fastify

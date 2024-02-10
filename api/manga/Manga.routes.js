@@ -1,4 +1,4 @@
-const MangaController = require("../api/manga/Manga.controller");
+const MangaController = require("./Manga.controller");
 
 async function MangaRoutes(fastify, options) {
   fastify.get("/mangas", MangaController.getAllMangas);

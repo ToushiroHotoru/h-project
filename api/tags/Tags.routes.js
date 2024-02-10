@@ -1,4 +1,4 @@
-const TagsController = require("../api/tags/Tags.controller");
+const TagsController = require("./Tags.controller");
 
 async function TagRoutes(fastify, options) {
   fastify.get("/get_tags", TagsController.getAllTags);

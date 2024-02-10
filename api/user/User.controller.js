@@ -1,7 +1,7 @@
 const bcrypt = require("bcryptjs");
 
-const User = require("../../schemas/User.schema");
-const Avatar = require("../../schemas/Avatars.schema");
+const User = require("./User.schema");
+const Avatar = require("../avatar/Avatar.schema");
 const TokenService = require("../../service/Token.service");
 const LINK = require("../../utils/API_URL");
 
@@ -11,7 +11,7 @@ class UserController {
   }
   async registerUser(request, reply) {
     try {
-      const { email, username, password } = JSON.parse(request.body);
+      const { email, username, password } = request.body;
       const candidateWithUsername = await User.findOne({
         username: username,
       }).lean();
@@ -175,7 +175,6 @@ class UserController {
   }
 
   async userProfile(request, reply) {
-    
     const userDB = await User.findOne({ username: request.query.username })
       .select(["username", "email", "preferencesTags", "exceptionsTags"])
       .lean();
@@ -230,7 +229,7 @@ class UserController {
       const parts = request.parts();
       for await (const part of parts) {
         if (part.type === "file" && part.fields.isUpload.value) {
-          const result = await Avatar.appendAvatar(part, part.fields.id.value);
+          const result = await Avatar.addUserAvatar(part, part.fields.id.value);
           await User.setAvatar({
             avatar: result._id.toString(),
             id: part.fields.id.value,

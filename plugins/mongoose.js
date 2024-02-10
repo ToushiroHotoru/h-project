@@ -1,5 +1,4 @@
 const mongoose = require("mongoose");
-// const chalk = require("chalk");
 
 async function mongooseInit(fastify, opts, done) {
   try {
@@ -7,7 +6,7 @@ async function mongooseInit(fastify, opts, done) {
       "mongodb+srv://h-project:NaDSwTgyCZxOFa2F@h-project-manga.okzes.mongodb.net/?retryWrites=true&w=majority"
     );
   } catch (err) {
-    // console.log(`db connection error - ${chalk.red(err)}`);
+    console.log(`db connection error - ${err}`);
   }
   done();
 }
