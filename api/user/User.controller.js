@@ -1,7 +1,7 @@
 const bcrypt = require("bcryptjs");
 
-const User = require("../../schemas/User.schema");
-const Avatar = require("../../schemas/Avatars.schema");
+const User = require("./User.schema");
+const Avatar = require("../avatar/Avatar.schema");
 const TokenService = require("../../service/Token.service");
 const LINK = require("../../utils/API_URL");
 
@@ -11,7 +11,7 @@ class UserController {
   }
   async registerUser(request, reply) {
     try {
-      const { email, username, password } = JSON.parse(request.body);
+      const { email, username, password } = request.body;
       const candidateWithUsername = await User.findOne({
         username: username,
       }).lean();
@@ -19,33 +19,31 @@ class UserController {
 
       if (candidateWithUsername) {
         return reply.code(200).send({
-          success: true,
+          status: "warning",
           message: "Пользователь с таким именем пользователя уже существует",
         });
       }
 
       if (candidateWithEmail) {
         return reply.code(200).send({
-          success: true,
+          status: "warning",
           message: "Пользователь с такой почтой уже существует",
         });
       }
 
       const passwordHash = bcrypt.hashSync(password, this.bcryptSalt);
 
-      const result = await User.register({
+      await User.register({
         email,
         username,
         password: passwordHash,
       });
 
       reply.code(200).send({
-        success: true,
-        message: "Вы успешно зарегистрировались",
-        userId: result._id,
+        status: "success",
       });
-    } catch (err) {
-      reply.code(500).send({ success: false, message: err.message });
+    } catch (error) {
+      reply.code(500).send({ status: "error", errors: error });
     }
   }
 
@@ -86,16 +84,19 @@ class UserController {
         })
         .code(200)
         .send({
-          accessToken: tokens.accessToken,
-          refreshToken: tokens.refreshToken,
-          user: {
-            id: user._id,
-            userName: user.username,
-            avatar: LINK + avatar.image,
+          status: "success",
+          data: {
+            accessToken: tokens.accessToken,
+            refreshToken: tokens.refreshToken,
+            user: {
+              id: user._id,
+              userName: user.username,
+              avatar: LINK + avatar.image,
+            },
           },
         });
     } catch (error) {
-      reply.code(500).send({ success: false, message: error.message });
+      reply.code(500).send({ status: "error", errors: error });
     }
   }
 
@@ -109,9 +110,9 @@ class UserController {
           path: "/",
         })
         .code(200)
-        .send({ success: true });
+        .send({ status: "success" });
     } catch (error) {
-      reply.code(500).send({ error: error });
+      reply.code(500).send({ status: "error", errors: error });
     }
   }
 
@@ -162,55 +163,57 @@ class UserController {
         })
         .code(200)
         .send({
-          accessToken: tokens.accessToken,
-          refreshToken: tokens.refreshToken,
-          user: {
-            id: userData._id,
-            userName: userData.username,
+          status: "success",
+          data: {
+            accessToken: tokens.accessToken,
+            user: {
+              id: userData._id,
+              userName: userData.username,
+            },
           },
         });
     } catch (error) {
-      reply.code(401).send({ error: error });
+      reply.code(401).send({ status: "error", errors: error });
     }
   }
 
   async userProfile(request, reply) {
-    
-    const userDB = await User.findOne({ username: request.query.username })
-      .select(["username", "email", "preferencesTags", "exceptionsTags"])
-      .lean();
+    try {
+      const userDB = await User.findOne({ username: request.query.username })
+        .select(["username", "email", "preferencesTags", "exceptionsTags"])
+        .lean();
 
-    if (!userDB) {
-      return reply.code(404).send({
-        message: "Пользователь с таким никнеймом не найден",
-        success: true,
-      });
+      if (!userDB) {
+        return reply.code(404).send({
+          message: "Пользователь с таким никнеймом не найден",
+          status: "warning",
+        });
+      }
+
+      reply.code(200).send({ status: "success", data: { user: userDB } });
+    } catch (error) {
+      reply.code(500).send({ status: "error", errors: error });
     }
-
-    reply.code(200).send({ user: userDB });
   }
 
   async getAllUsers(request, reply) {
     try {
-      const res = await User.allUsers();
-      reply.code(200).send(res);
-    } catch (err) {
-      console.log(err.message);
-      reply.code(500).send(err.message);
+      const users = await User.allUsers();
+      reply.code(200).send({ status: "success", data: { users } });
+    } catch (error) {
+      reply.code(500).send({ status: "error", errors: error });
     }
   }
 
   async setPreferencesTags(request, reply) {
     try {
       const { tags, id } = request.body;
-      console.log(tags, id);
       if (tags.length) {
         await User.setPreferencesTags({ tags, id });
       }
-      reply.code(200).send({ success: true });
-    } catch (err) {
-      console.log(err.message);
-      reply.code(500).send(err.message);
+      reply.code(200).send({ status: "success" });
+    } catch (error) {
+      reply.code(500).send({ status: "error", errors: error });
     }
   }
 
@@ -218,10 +221,9 @@ class UserController {
     try {
       const { tags, id } = request.body;
       await User.setExceptionsTags({ tags, id });
-      reply.code(200);
-    } catch (err) {
-      console.log(err.message);
-      reply.code(500).send(err.message);
+      reply.code(200).send({ status: "success" });
+    } catch (error) {
+      reply.code(500).send({ status: "error", errors: error });
     }
   }
 
@@ -230,7 +232,7 @@ class UserController {
       const parts = request.parts();
       for await (const part of parts) {
         if (part.type === "file" && part.fields.isUpload.value) {
-          const result = await Avatar.appendAvatar(part, part.fields.id.value);
+          const result = await Avatar.addUserAvatar(part, part.fields.id.value);
           await User.setAvatar({
             avatar: result._id.toString(),
             id: part.fields.id.value,
@@ -243,9 +245,8 @@ class UserController {
         }
       }
       reply.code(200);
-    } catch (err) {
-      console.log(err.message);
-      reply.code(500).send(err.message);
+    } catch (error) {
+      reply.code(500).send({ status: "error", errors: error });
     }
   }
 }

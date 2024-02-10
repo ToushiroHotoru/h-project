@@ -1,4 +1,4 @@
-const UserController = require("../api/user/User.controller");
+const UserController = require("./User.controller");
 
 async function UserRoutes(fastify, options) {
   fastify.post("/api/registration", UserController.registerUser);

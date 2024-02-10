@@ -1,4 +1,4 @@
-const Index = require("../api/index/Index.controller");
+const Index = require("./Index.controller");
 
 async function IndexRoutes(fastify, options) {
   fastify.get("/", Index.welcomePage);

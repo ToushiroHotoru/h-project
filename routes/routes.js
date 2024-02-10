@@ -1,10 +1,10 @@
-const IndexRoutes = require("./Index.routes");
-const MangaRoutes = require("./Manga.routes");
-const TagsRoutes = require("./Tag.routes");
-const UserRoutes = require("./User.routes");
-const AvatarRoutes = require("./Avatar.routes");
-const UserPrivateRoutes = require("./UserPrivate.routes");
-const CommentsRoute = require("./Comments.routes");
+const IndexRoutes = require("../api/index/Index.routes");
+const MangaRoutes = require("../api/manga/Manga.routes");
+const TagsRoutes = require("../api/tags/Tags.routes");
+const UserRoutes = require("../api/user/User.routes");
+const AvatarRoutes = require("../api/avatar/Avatar.routes");
+const UserPrivateRoutes = require("../api/user/UserPrivate.routes");
+const CommentsRoute = require("../api/comments/Comments.routes");
 
 async function routes(fastify, options) {
   fastify.register(IndexRoutes);

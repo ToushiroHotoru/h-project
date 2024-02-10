@@ -1,17 +1,20 @@
-const Manga = require("../../schemas/Manga.schema");
-const User = require("../../schemas/User.schema");
-const Comments = require("../../schemas/Comments.schema");
-const Avatar = require("../../schemas/Avatars.schema");
 const daysjs = require("dayjs");
-const LINK =
-  process.env.NODE_ENV !== "development"
-    ? "http://h-project.toushirohotoru.repl.co"
-    : "http://localhost:8080";
+
+const Comments = require("./Comments.schema");
+
+const Manga = require("../manga/Manga.schema");
+const User = require("../user/User.schema");
+const Avatar = require("../avatar/Avatar.schema");
+
+const LINK = require("../../utils/API_URL");
+
 class CommentsController {
   async addComment(request, reply) {
     try {
       const { userId, mangaId, text } = request.body;
-      let user = await User.findById(userId).select(['_id', 'username', 'avatar']).lean();
+      let user = await User.findById(userId)
+        .select(["_id", "username", "avatar"])
+        .lean();
       if (!user) {
         return reply
           .code(404)
@@ -35,15 +38,18 @@ class CommentsController {
       const formatedDate = daysjs(comment.createdAt).format("DD.MM.YYYY HH:mm");
 
       reply.code(200).send({
-        id: _id,
-        comment: {
-          ...comment,
-          createdAt: formatedDate,
-          user: user,
+        status: "success",
+        data: {
+          id: _id,
+          comment: {
+            ...comment,
+            createdAt: formatedDate,
+            user: user,
+          },
         },
       });
     } catch (error) {
-      reply.code(500).send({ success: false, message: error });
+      reply.code(500).send({ success: "error", errors: error });
     }
   }
 
@@ -72,10 +78,12 @@ class CommentsController {
         })
       );
 
-      reply.code(200).send({ comments: comments2 });
+      reply
+        .code(200)
+        .send({ status: "success", data: { comments: comments2 } });
     } catch (error) {
       console.log(error);
-      reply.code(500).send({ error });
+      reply.code(500).send({ status: "error", errors: error });
     }
   }
 }

@@ -199,15 +199,10 @@ MangaSchema.statics.sortByViews = async function (offset, step, tags) {
   };
 };
 
-
 MangaSchema.statics.getStaticFields = function (id) {
-  return this.findById(id).select([
-    "title",
-    "cover",
-    "artist",
-    "series",
-    "cycle",
-  ]);
+  return this.findById(id)
+    .select(["title", "cover", "artist", "series", "cycle"])
+    .lean();
 };
 
 MangaSchema.statics.getDynamicFields = function (id) {
@@ -219,6 +214,30 @@ MangaSchema.statics.getDynamicFields = function (id) {
 
 MangaSchema.statics.getMangaPages = function (id) {
   return this.findById(id).select("title pages").lean();
+};
+
+MangaSchema.statics.getLastPublishedMangas = function () {
+  return this.find({})
+    .sort({ createdAt: "desc" })
+    .select("_id title cover")
+    .limit(8)
+    .lean();
+};
+
+MangaSchema.statics.getMostViewedOnLastWeekMangas = function () {
+  return this.find({ createdAt: { $gte: Date.now() - 604800000 } })
+    .sort({ views: "desc" })
+    .select("_id title cover")
+    .limit(8)
+    .lean();
+};
+
+MangaSchema.statics.getMostLikedOnLastWeekMangas = function () {
+  return this.find({ createdAt: { $gte: Date.now() - 604800000 } })
+    .sort({ likes: "desc" })
+    .select("_id title cover")
+    .limit(8)
+    .lean();
 };
 
 module.exports = model("Manga", MangaSchema);

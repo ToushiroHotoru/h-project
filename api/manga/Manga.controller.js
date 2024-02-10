@@ -1,17 +1,15 @@
 // const chalk = require("chalk");
 const dayjs = require("dayjs");
 const sizeOf = require("image-size");
-const path = require("path");
 
-const Manga = require("../../schemas/Manga.schema.js");
-const MangaService = require("../../service/Manga.service");
+const Manga = require("./Manga.schema.js");
+const MangaService = require("./Manga.service.js");
 const LINK = require("../../utils/API_URL.js");
 
 class MangaController {
   async getAllMangas(request, reply) {
     try {
       const { page, sort } = request.query;
-      console.log(request.query["tags"]);
       const tags = request.query["tags"]
         ? request.query["tags"].split(",")
         : "";
@@ -21,18 +19,16 @@ class MangaController {
       const mangaTotal = await Manga.count();
 
       if (!reg.test(page) || page - 1 < 0 || page - 1 > mangaTotal / 24) {
-        reply
-          .status(404)
-          .send({ message: "задана не верная страница", total: 0, mangas: [] });
+        reply.status(404).send({
+          status: "error",
+          message: "задана не верная страница",
+          total: 0,
+          mangas: [],
+        });
       }
-      let mangasService = await MangaService.mangaSort(
-        sort,
-        offset,
-        step,
-        tags
-      );
+      let sortedMangas = await MangaService.mangaSort(sort, offset, step, tags);
 
-      const mangas = mangasService.mangas.map((item) => {
+      const mangas = sortedMangas.mangas.map((item) => {
         const pages = item.pages.map((page) => {
           return LINK + page;
         });
@@ -51,19 +47,21 @@ class MangaController {
           createdAt: dayjs(item.createdAt).format("DD.MM.YYYY"),
         };
       });
-      const total = mangasService.total;
-      reply.code(200).send({ total, offset, step, mangas });
-    } catch (err) {
-      console.log(err);
+      const total = sortedMangas.total;
+      reply
+        .code(200)
+        .send({ status: "success", data: { total, offset, step, mangas } });
+    } catch (error) {
+      reply.code(500).send({ status: "error", errors: error });
     }
   }
 
   async getMangasId(request, reply) {
     try {
       const mangas = await Manga.getAllMangasId();
-      reply.code(200).send(mangas);
+      reply.code(200).send({ status: "success", data: { mangas } });
     } catch (error) {
-      // console.log(chalk.red(error));
+      reply.code(500).send({ status: "error", errors: error });
     }
   }
 
@@ -71,18 +69,23 @@ class MangaController {
     try {
       const { id } = request.body;
       await Manga.deleteOne({ _id: id });
-      reply.code(200).send({ msg: `manga by id - '${id}' was deleted` });
-    } catch (err) {
-      // console.log(`manga error - ${chalk.red(err)}`);
+      reply.code(200).send({
+        status: "success",
+        message: `manga by id - '${id}' was deleted`,
+      });
+    } catch (error) {
+      reply.code(500).send({ status: "error", errors: error });
     }
   }
 
   async deleteMangaAll(request, reply) {
     try {
       await Manga.deleteMany({});
-      reply.code(200).send({ msg: "all mangas was deleted" });
-    } catch (err) {
-      // console.log(`manga error - ${chalk.red(err)}`);
+      reply
+        .code(200)
+        .send({ status: "success", message: "all mangas was deleted" });
+    } catch (error) {
+      reply.code(500).send({ status: "error", errors: error });
     }
   }
 
@@ -90,15 +93,14 @@ class MangaController {
     try {
       const id = request.query.id;
       let manga = await Manga.getStaticFields(id);
-      manga = JSON.parse(JSON.stringify(manga));
       manga = { ...manga, cover: LINK + manga.cover };
-      reply.code(200).send(manga);
-    } catch (err) {
-      // console.log(`manga error - ${chalk.red(err)}`);
+      reply.code(200).send({ status: "success", data: { manga } });
+    } catch (error) {
+      reply.code(500).send({ status: "error", errors: error });
     }
   }
 
-  async getMangaForReader(request, reply) {
+  async getMangaPagesForReader(request, reply) {
     try {
       const id = request.query.id;
       let manga = await Manga.getMangaPages(id);
@@ -114,9 +116,9 @@ class MangaController {
         pages: pages,
       };
 
-      reply.code(200).send(manga);
-    } catch (err) {
-      reply.code(500).send(err);
+      reply.code(200).send({ status: "success", data: { manga } });
+    } catch (error) {
+      reply.code(500).send({ status: "error", errors: error });
     }
   }
 
@@ -140,45 +142,81 @@ class MangaController {
         }),
       };
 
-      reply.code(200).send(manga);
-    } catch (err) {
-      // console.log(`manga error - ${chalk.red(err)}`);
+      reply.code(200).send({ status: "success", data: { manga } });
+    } catch (error) {
+      reply.code(500).send({ status: "error", errors: error });
     }
   }
 
   async mangaAppendMany(request, reply) {
     try {
       MangaService.mangaAppendService();
-      reply.code(200).send({ msg: "72 records created" });
-    } catch (err) {
-      // console.log(`New user error - ${chalk.red(err)}`);
+      reply
+        .code(200)
+        .send({ status: "success", message: "72 records created" });
+    } catch (error) {
+      reply.code(500).send({ status: "error", errors: error });
     }
   }
 
   async mangaAppendOne(request, reply) {
     try {
-      console.log(request.body);
       const result = await MangaService.mangaAppendOneService(request.body);
-      console.log(result);
-      reply.code(200).send({ msg: `manga was written ${result._id}` });
-    } catch (err) {
-      // console.log(`New user error - ${chalk.red(err)}`);
+      reply.code(200).send({
+        status: "success",
+        message: `manga was written ${result._id}`,
+      });
+    } catch (error) {
+      reply.code(500).send({ status: "error", errors: error });
     }
   }
 
-  async newMangas(req, reply) {
+  async addNewMangasStatic(request, reply) {
     try {
-      let manga = await Manga.find({})
-        .sort({ createdAt: "desc" })
-        .select("_id title cover")
-        .limit(8)
-        .lean();
-      manga = manga.map((item) => {
+      const result = await MangaService.addNewMangaStatic();
+      reply.code(200).send({
+        status: "success",
+        message: `manga was written `,
+      });
+    } catch (error) {
+      reply.code(500).send({ status: "error", errors: error });
+    }
+  }
+
+  async lastPublishedMangas(request, reply) {
+    try {
+      let mangas = await Manga.getLastPublishedMangas();
+      mangas = mangas.map((item) => {
         return { ...item, cover: LINK + item.cover };
       });
-      console.log(manga);
-      reply.code(200).send({ manga: manga });
-    } catch (error) {}
+      reply.code(200).send({ status: "success", data: { mangas } });
+    } catch (error) {
+      reply.code(500).send({ status: "error", errors: error });
+    }
+  }
+
+  async mostViewedOnLastWeekMangas(request, reply) {
+    try {
+      let mangas = await Manga.getMostViewedOnLastWeekMangas();
+      mangas = mangas.map((item) => {
+        return { ...item, cover: LINK + item.cover };
+      });
+      reply.code(200).send({ status: "success", data: { mangas } });
+    } catch (error) {
+      reply.code(500).send({ status: "error", errors: error });
+    }
+  }
+
+  async mostLikedOnLastWeekMangas(request, reply) {
+    try {
+      let mangas = await Manga.getMostLikedOnLastWeekMangas();
+      mangas = mangas.map((item) => {
+        return { ...item, cover: LINK + item.cover };
+      });
+      reply.code(200).send({ status: "success", data: { mangas } });
+    } catch (error) {
+      reply.code(500).send({ status: "error", errors: error });
+    }
   }
 }
 

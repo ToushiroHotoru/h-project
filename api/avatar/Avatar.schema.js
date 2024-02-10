@@ -24,7 +24,7 @@ const AvatarSchema = new Schema(
   { timestamps: true }
 );
 
-AvatarSchema.statics.appendAvatar = async function (file, userId) {
+AvatarSchema.statics.addUserAvatar = async function (file, userId) {
   let timestamps = Date.now();
   let newName = timestamps.toString() + "_" + file.filename;
   await pump(
@@ -37,6 +37,10 @@ AvatarSchema.statics.appendAvatar = async function (file, userId) {
     image: path.join(`/upload/user_avatars/${newName}`),
     userId: userId,
   });
+};
+
+AvatarSchema.statics.getsSiteAvatars = async function () {
+  return await this.find({ type: "site" }).lean();
 };
 
 module.exports = model("Avatar", AvatarSchema);
