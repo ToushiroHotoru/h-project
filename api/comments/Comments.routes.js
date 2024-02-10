@@ -1,8 +1,8 @@
-const commentsController = require("./Comments.controller.js");
+const CommentsController = require("./Comments.controller.js");
 
 async function CommentsRoutes(fastify, options) {
-  fastify.post("/add_comment", commentsController.addComment);
-  fastify.get("/get_comments", commentsController.getMangaComments);
+  fastify.get("/api/get_comments", CommentsController.getMangaComments);
+  fastify.post("/api/add_comment", CommentsController.addComment);
 }
 
 module.exports = CommentsRoutes;

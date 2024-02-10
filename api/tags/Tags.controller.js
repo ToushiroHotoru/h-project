@@ -4,14 +4,26 @@ const LINK = require("../../utils/API_URL");
 
 class TagsController {
   async addTags(request, reply) {
-    const { image, miniImage, name, description } = request.body;
-    await Tags.add({ image, miniImage, name, description });
-    reply.code(200).send({ msg: "tag has been created" });
+    try {
+      const { image, miniImage, name, description } = request.body;
+      await Tags.add({ image, miniImage, name, description });
+      reply
+        .code(200)
+        .send({ status: "success", message: "tag has been created" });
+    } catch (error) {
+      reply.code(500).send({ status: "error", errors: error });
+    }
   }
 
   async deleteTags(request, reply) {
-    await Tags.deleteAll();
-    reply.code(200).send({ msg: "all tags has been removed" });
+    try {
+      await Tags.deleteAll();
+      reply
+        .code(200)
+        .send({ status: "success", message: "all tags has been removed" });
+    } catch (error) {
+      reply.code(500).send({ status: "error", errors: error });
+    }
   }
 
   async getTagsCount(request, reply) {
@@ -20,7 +32,6 @@ class TagsController {
         ? request.query.tags.split(",")
         : [];
       let tags2 = await Tags.getAll();
-      // console.log(selectedTags, selectedTags.length);
 
       if (selectedTags.length) {
         const unselectedTags = await Tags.find({
@@ -66,48 +77,52 @@ class TagsController {
         })
       );
 
-      reply.code(200).send({ tags: tagsNotFiltered });
-    } catch (err) {
-      console.log(err.message);
+      reply
+        .code(200)
+        .send({ status: "success", data: { tags: tagsNotFiltered } });
+    } catch (error) {
+      reply.code(500).send({ status: "error", errors: error });
     }
   }
 
   async getAllTags(request, reply) {
-    let selectedTags = request.query.tags;
-    let tags = await Tags.getAll();
-    if (selectedTags) {
-      if (Array.isArray(selectedTags)) {
-        const filteredTagsCount = await Manga.find({
-          tags: { $all: [...selectedTags] },
-        });
-        reply
-          .code(200)
-          .send({ tags: tags, filteredTagsCount: filteredTagsCount });
-      } else {
-        const filteredTagsCount = await Manga.find({ tags: selectedTags });
-        reply
-          .code(200)
-          .send({ tags: tags, filteredTagsCount: filteredTagsCount });
+    try {
+      let selectedTags = request.query.tags;
+      let tags = await Tags.getAll();
+      if (selectedTags) {
+        if (Array.isArray(selectedTags)) {
+          const filteredTagsCount = await Manga.find({
+            tags: { $all: [...selectedTags] },
+          });
+          reply
+            .code(200)
+            .send({ tags: tags, filteredTagsCount: filteredTagsCount });
+        } else {
+          const filteredTagsCount = await Manga.find({ tags: selectedTags });
+          reply
+            .code(200)
+            .send({ tags: tags, filteredTagsCount: filteredTagsCount });
+        }
       }
+
+      tags.forEach(async (tag) => {
+        let tagsCount = await Manga.find({ tags: tag }).count();
+        await Tags.findByIdAndUpdate(tag._id, { count: tagsCount });
+      });
+
+      tags = await Tags.getAll();
+      tags = tags.map((tag) => {
+        return {
+          ...tag,
+          image: LINK + tag.image,
+          miniImage: LINK + tag.miniImage,
+        };
+      });
+
+      reply.code(200).send({ status: "success", data: { tags } });
+    } catch (error) {
+      reply.code(500).send({ status: "error", errors: error });
     }
-
-    tags.forEach(async (tag) => {
-      let tagsCount = await Manga.find({ tags: tag }).count();
-      await Tags.findByIdAndUpdate(tag._id, { count: tagsCount });
-    });
-
-    tags = await Tags.getAll();
-    tags = tags.map((tag) => {
-      return {
-        ...tag,
-        image: LINK + tag.image,
-        miniImage: LINK + tag.miniImage,
-      };
-    });
-
-    // console.log(tags);
-
-    reply.code(200).send({ tags });
   }
 }
 

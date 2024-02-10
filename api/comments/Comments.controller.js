@@ -38,15 +38,18 @@ class CommentsController {
       const formatedDate = daysjs(comment.createdAt).format("DD.MM.YYYY HH:mm");
 
       reply.code(200).send({
-        id: _id,
-        comment: {
-          ...comment,
-          createdAt: formatedDate,
-          user: user,
+        status: "success",
+        data: {
+          id: _id,
+          comment: {
+            ...comment,
+            createdAt: formatedDate,
+            user: user,
+          },
         },
       });
     } catch (error) {
-      reply.code(500).send({ success: false, message: error });
+      reply.code(500).send({ success: "error", errors: error });
     }
   }
 
@@ -75,10 +78,12 @@ class CommentsController {
         })
       );
 
-      reply.code(200).send({ comments: comments2 });
+      reply
+        .code(200)
+        .send({ status: "success", data: { comments: comments2 } });
     } catch (error) {
       console.log(error);
-      reply.code(500).send({ error });
+      reply.code(500).send({ status: "error", errors: error });
     }
   }
 }
