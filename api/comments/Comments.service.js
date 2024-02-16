@@ -1,10 +1,9 @@
 const daysjs = require("dayjs");
 
-const Comments = require("./Comments.schema");
-
-const Manga = require("../manga/Manga.schema");
-const User = require("../user/User.schema");
-const Avatar = require("../avatar/Avatar.schema");
+const User = require("../user/User.model");
+const Avatar = require("../avatar/Avatar.model");
+const Comments = require("./Comments.model");
+const Manga = require("../manga/Manga.model");
 
 const LINK = require("../../utils/API_URL");
 

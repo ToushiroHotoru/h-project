@@ -1,4 +1,4 @@
-const Avatar = require("./Avatar.schema");
+const Avatar = require("./Avatar.model");
 const LINK = require("../../utils/API_URL");
 
 class AvatarController {

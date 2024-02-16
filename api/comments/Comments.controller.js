@@ -2,7 +2,7 @@ const CommentsService = require("./Comments.service.js");
 const {
   addCommentValidation,
   getCommentValidation,
-} = require("./Comments.validation.js");
+} = require("./Comments.schema.js");
 
 async function CommentsController(fastify, options) {
   fastify.get(

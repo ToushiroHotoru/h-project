@@ -1,7 +1,7 @@
 const bcrypt = require("bcryptjs");
 
-const User = require("./User.schema");
-const Avatar = require("../avatar/Avatar.schema");
+const User = require("./User.model");
+const Avatar = require("../avatar/Avatar.model");
 const TokenService = require("../../service/Token.service");
 const LINK = require("../../utils/API_URL");
 

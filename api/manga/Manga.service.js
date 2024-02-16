@@ -1,8 +1,7 @@
-// const chalk = require("chalk");
 const dayjs = require("dayjs");
 const sizeOf = require("image-size");
 
-const Manga = require("./Manga.schema.js");
+const Manga = require("./Manga.model.js");
 const MangaService = require("./Manga.utils.js");
 const LINK = require("../../utils/API_URL.js");
 

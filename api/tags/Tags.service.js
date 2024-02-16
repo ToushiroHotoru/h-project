@@ -1,5 +1,5 @@
-const Tags = require("./Tags.schema");
-const Manga = require("../manga/Manga.schema");
+const Tags = require("./Tags.model");
+const Manga = require("../manga/Manga.model");
 const LINK = require("../../utils/API_URL");
 
 class TagsController {
