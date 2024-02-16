@@ -18,14 +18,14 @@ class CommentsController {
       if (!user) {
         return reply
           .code(404)
-          .send({ success: false, message: "User not found" });
+          .send({ status: "error", message: "User not found" });
       }
       const manga = await Manga.findById(mangaId).lean();
 
       if (!manga) {
         return reply
           .code(404)
-          .send({ success: false, message: "Manga not found" });
+          .send({ status: "error", message: "Manga not found" });
       }
 
       const { _id } = await Comments.addComment({ text, mangaId, userId });
@@ -34,7 +34,9 @@ class CommentsController {
         .select(["image"])
         .lean();
       user = { ...user, avatar: LINK + avatar.image };
-      const comment = await Comments.findById(_id).lean();
+      const comment = await Comments.findById(_id)
+        .select("text answersFor")
+        .lean();
       const formatedDate = daysjs(comment.createdAt).format("DD.MM.YYYY HH:mm");
 
       reply.code(200).send({
@@ -44,12 +46,12 @@ class CommentsController {
           comment: {
             ...comment,
             createdAt: formatedDate,
-            user: user,
           },
+          user: user,
         },
       });
     } catch (error) {
-      reply.code(500).send({ success: "error", errors: error });
+      reply.code(500).send({ status: "error", message: error.message });
     }
   }
 
@@ -82,8 +84,7 @@ class CommentsController {
         .code(200)
         .send({ status: "success", data: { comments: comments2 } });
     } catch (error) {
-      console.log(error);
-      reply.code(500).send({ status: "error", errors: error });
+      reply.code(500).send({ status: "error", message: error.message });
     }
   }
 }
