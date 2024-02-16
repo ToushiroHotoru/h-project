@@ -1,7 +1,12 @@
+const {
+  allMangasSchema,
+  homePageMangasSchema,
+  readerMangaPagesSchema,
+} = require("./Manga.schema");
 const MangaService = require("./Manga.service");
 
 async function MangaRoutes(fastify, options) {
-  fastify.get("/api/mangas", MangaService.getAllMangas);
+  fastify.get("/api/mangas", allMangasSchema, MangaService.getAllMangas);
 
   fastify.get("/api/get_paths", MangaService.getMangasId);
 
@@ -21,20 +26,24 @@ async function MangaRoutes(fastify, options) {
 
   fastify.get(
     "/api/last_published_mangas",
+    homePageMangasSchema,
     MangaService.lastPublishedMangas
   );
 
   fastify.get(
     "/api/last_most_viewed_mangas",
+    homePageMangasSchema,
     MangaService.mostViewedOnLastWeekMangas
   );
   fastify.get(
     "/api/last_most_liked_mangas",
+    homePageMangasSchema,
     MangaService.mostLikedOnLastWeekMangas
   );
 
   fastify.get(
     "/api/reader-manga-by-id",
+    readerMangaPagesSchema,
     MangaService.getMangaPagesForReader
   );
 }
