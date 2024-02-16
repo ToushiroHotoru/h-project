@@ -1,12 +1,7 @@
-const fs = require("fs");
-const path = require("path");
+const IndexService = require("./Index.service");
 
-const welcomePage = (request, reply) => {
-  const stream = fs.createReadStream(path.join("views", "index.html"), "utf8");
-  reply.header("Content-Type", "text/html");
-  reply.send(stream);
-};
+async function IndexRoutes(fastify, options) {
+  fastify.get("/", IndexService.welcomePage);
+}
 
-module.exports = {
-  welcomePage,
-};
+module.exports = IndexRoutes;
