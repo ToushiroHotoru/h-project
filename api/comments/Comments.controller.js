@@ -1,8 +1,20 @@
 const CommentsService = require("./Comments.service.js");
+const {
+  addCommentValidation,
+  getCommentValidation,
+} = require("./Comments.validation.js");
 
-async function CommentsRoutes(fastify, options) {
-  fastify.get("/api/get_comments", CommentsService.getMangaComments);
-  fastify.post("/api/add_comment", CommentsService.addComment);
+async function CommentsController(fastify, options) {
+  fastify.get(
+    "/api/get_comments",
+    getCommentValidation,
+    CommentsService.getMangaComments
+  );
+  fastify.post(
+    "/api/add_comment",
+    addCommentValidation,
+    CommentsService.addComment
+  );
 }
 
-module.exports = CommentsRoutes;
+module.exports = CommentsController;
