@@ -1,4 +1,4 @@
-const Manga = require("./Manga.schema");
+const Manga = require("./Manga.model");
 const mongoose = require("mongoose");
 const fs = require("fs");
 const path = require("path");

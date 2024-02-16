@@ -20,12 +20,17 @@ class MangaController {
       if (!reg.test(page) || page - 1 < 0 || page - 1 > mangaTotal / 24) {
         reply.status(404).send({
           status: "error",
-          message: "задана не верная страница",
+          message: "Страница не найдена",
           total: 0,
           mangas: [],
         });
       }
-      let sortedMangas = await MangaService.mangaSort(sort, offset, step, tags);
+      const sortedMangas = await MangaService.mangaSort(
+        sort,
+        offset,
+        step,
+        tags
+      );
 
       const mangas = sortedMangas.mangas.map((item) => {
         const pages = item.pages.map((page) => {
