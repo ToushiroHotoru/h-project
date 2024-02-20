@@ -19,21 +19,23 @@ class UserController {
 
       if (candidateWithUsername) {
         return reply.code(200).send({
-          status: "warning",
+          status: "error",
+          data: {},
           message: "Пользователь с таким именем пользователя уже существует",
         });
       }
 
       if (candidateWithEmail) {
         return reply.code(200).send({
-          status: "warning",
+          status: "error",
+          data: {},
           message: "Пользователь с такой почтой уже существует",
         });
       }
 
       const passwordHash = bcrypt.hashSync(password, this.bcryptSalt);
 
-      await User.register({
+      const registeredUser = await User.register({
         email,
         username,
         password: passwordHash,
@@ -41,6 +43,10 @@ class UserController {
 
       reply.code(200).send({
         status: "success",
+        data: {
+          id: registeredUser._id,
+        },
+        message: "",
       });
     } catch (error) {
       reply.code(500).send({ status: "error", errors: error });
