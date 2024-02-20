@@ -20,6 +20,7 @@ const MangaSchema = new Schema(
       part: { type: Number, default: 1 },
     },
     pages: { type: Array, required: true },
+    route: { type: String },
   },
   { timestamps: true }
 );
@@ -28,8 +29,21 @@ MangaSchema.statics.add = function (data) {
   return this.create(data);
 };
 
-MangaSchema.statics.getAllMangasId = function () {
-  return this.find({}).select("_id");
+MangaSchema.statics.getAllMangasId = async function () {
+  return await this.find().select("route").lean();
+};
+
+MangaSchema.statics.getStaticFields = async function (id) {
+  return await this.findOne({ route: id })
+    .select(["title", "cover", "artist", "series", "cycle", "route"])
+    .lean();
+};
+
+MangaSchema.statics.getDynamicFields = async function (id) {
+  return await this.findOne({ route: id })
+    .select(["-title", "-cover", "-artist", "-series", "-cycle"])
+    .populate("tags")
+    .lean();
 };
 
 MangaSchema.statics.sortByTime = async function (offset, step, tags) {
@@ -199,45 +213,56 @@ MangaSchema.statics.sortByViews = async function (offset, step, tags) {
   };
 };
 
-MangaSchema.statics.getStaticFields = function (id) {
-  return this.findById(id)
-    .select(["title", "cover", "artist", "series", "cycle"])
-    .lean();
-};
-
-MangaSchema.statics.getDynamicFields = function (id) {
-  return this.findById(id)
-    .select(["-title", "-cover", "-artist", "-series", "-cycle"])
-    .populate("tags")
-    .lean();
-};
-
-MangaSchema.statics.getMangaPages = function (id) {
-  return this.findById(id).select("title pages").lean();
+MangaSchema.statics.getMangaPages = async function (id) {
+  return await this.findOne({ route: id }).select("title pages").lean();
 };
 
 MangaSchema.statics.getLastPublishedMangas = function () {
   return this.find({})
     .sort({ createdAt: "desc" })
-    .select("_id title cover")
+    .select("title cover route")
     .limit(8)
     .lean();
 };
 
-MangaSchema.statics.getMostViewedOnLastWeekMangas = function () {
-  return this.find({ createdAt: { $gte: Date.now() - 604800000 } })
+MangaSchema.statics.getMostViewedOnLastWeekMangas = async function () {
+  const lastViewedOnLastWeek = await this.find({
+    createdAt: { $gte: Date.now() - 604800000 },
+  })
     .sort({ views: "desc" })
-    .select("_id title cover")
+    .select("title cover route")
     .limit(8)
     .lean();
+
+  if (!lastViewedOnLastWeek.length) {
+    return await this.find()
+      .sort({ views: "desc" })
+      .select("title cover route")
+      .limit(8)
+      .lean();
+  }
+
+  return lastViewedOnLastWeek;
 };
 
-MangaSchema.statics.getMostLikedOnLastWeekMangas = function () {
-  return this.find({ createdAt: { $gte: Date.now() - 604800000 } })
+MangaSchema.statics.getMostLikedOnLastWeekMangas = async function () {
+  const lastLikedOnLastWeek = await this.find({
+    createdAt: { $gte: Date.now() - 604800000 },
+  })
     .sort({ likes: "desc" })
-    .select("_id title cover")
+    .select("title cover route")
     .limit(8)
     .lean();
+
+  if (!lastLikedOnLastWeek.length) {
+    return await this.find()
+      .sort({ likes: "desc" })
+      .select("title cover route")
+      .limit(8)
+      .lean();
+  }
+
+  return lastLikedOnLastWeek;
 };
 
 module.exports = model("Manga", MangaSchema);
