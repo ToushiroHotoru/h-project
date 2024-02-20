@@ -4,6 +4,7 @@ const User = require("./User.model");
 const Avatar = require("../avatar/Avatar.model");
 const TokenService = require("../../service/Token.service");
 const LINK = require("../../utils/API_URL");
+const RoleModel = require("../role/Role.model");
 
 class UserController {
   constructor() {
@@ -185,19 +186,44 @@ class UserController {
 
   async userProfile(request, reply) {
     try {
-      const userDB = await User.findOne({ username: request.query.username })
-        .select(["username", "email", "preferencesTags", "exceptionsTags"])
-        .lean();
+      let userDB = await User.findOne({ username: request.query.username })
+        .select([
+          "username",
+          "email",
+          "preferencesTags",
+          "exceptionsTags",
+          "avatar",
+          "createdAt",
+        ])
+        .populate({
+          path: "avatar",
+          select: "image",
+        })
+        .populate({
+          path: "role",
+          select: "roleRu",
+        });
+
+      userDB = JSON.parse(JSON.stringify(userDB));
 
       if (!userDB) {
         return reply.code(404).send({
+          status: "error",
+          data: {},
           message: "Пользователь с таким никнеймом не найден",
-          status: "warning",
         });
+      }
+
+      if (userDB.avatar?.image) {
+        userDB = {
+          ...userDB,
+          avatar: { ...userDB.avatar, image: LINK + userDB.avatar?.image },
+        };
       }
 
       reply.code(200).send({ status: "success", data: { user: userDB } });
     } catch (error) {
+      console.log(error);
       reply.code(500).send({ status: "error", errors: error });
     }
   }
@@ -254,6 +280,10 @@ class UserController {
     } catch (error) {
       reply.code(500).send({ status: "error", errors: error });
     }
+  }
+  async roleSet(reply) {
+    await RoleModel.addRole();
+    reply.code(200);
   }
 }
 

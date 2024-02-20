@@ -2,9 +2,11 @@ const { model, Schema } = require("mongoose");
 
 const userSchema = new Schema(
   {
-    username: { type: String, required: true },
+    username: { type: String, required: true, unique: true },
     password: { type: String, required: true },
     email: { type: String, required: true },
+    banner: { type: String, default: null },
+    favorites: { type: Array, default: [] },
     preferencesTags: [
       {
         type: Schema.Types.ObjectId,
@@ -21,21 +23,21 @@ const userSchema = new Schema(
       type: Schema.Types.ObjectId,
       ref: "Avatar",
     },
-    banner: { type: String, default: null },
-    favorites: { type: Array, default: [] },
     permissions: {
       showTags: { type: Boolean, default: true },
       showFavorites: { type: Boolean, default: true },
     },
-    userType: { type: String, deafult: "notAdmin" },
+    role: {
+      type: Schema.Types.ObjectId,
+      ref: "Role",
+      default: "65d4b4b5358e0d03d7ba7c7e",
+    },
     passwordChangeUuid: { type: String, default: null },
-    tokens: { type: Array, default: [] },
   },
   { timestamps: true }
 );
 
 userSchema.statics.register = function (params) {
-
   return this.create({
     username: params.username,
     password: params.password,
