@@ -95,8 +95,8 @@ class MangaController {
 
   async getStatic(request, reply) {
     try {
-      const id = request.query.id;
-      let manga = await Manga.getStaticFields(id);
+      const { route } = request.query;
+      let manga = await Manga.getStaticFields(route);
       manga = { ...manga, cover: LINK + manga.cover };
       reply.code(200).send({ status: "success", data: { manga } });
     } catch (error) {
@@ -106,8 +106,10 @@ class MangaController {
 
   async getMangaPagesForReader(request, reply) {
     try {
-      const id = request.query.id;
-      let manga = await Manga.getMangaPages(id);
+      const { route } = request.query;
+      let manga = await Manga.getMangaPages(route);
+
+      console.log(manga);
 
       const pages = manga.pages.map((item) => {
         return {
@@ -128,8 +130,8 @@ class MangaController {
 
   async getDynamic(request, reply) {
     try {
-      const id = request.query.id;
-      let manga = await Manga.getDynamicFields(id);
+      const { route } = request.query;
+      let manga = await Manga.getDynamicFields(route);
       const pages = manga.pages.map((item) => {
         return LINK + item;
       });
@@ -175,6 +177,22 @@ class MangaController {
     }
   }
 
+  async updateRoutes(request, reply) {
+    try {
+      const result = await Manga.find().lean();
+      result.map(async (manga) => {
+        await Manga.findByIdAndUpdate(manga._id, {
+          route: manga.title
+            .toLowerCase()
+            .replace('(.|,|_|{|}|?|/|:|;|[|]|+|=|%|$|#|@|"|\\|<|>)', "-")
+            .replace(" ", "-"),
+        });
+      });
+    } catch (error) {
+      reply.code(500).send({ status: "error", errors: error });
+    }
+  }
+
   async addNewMangasStatic(request, reply) {
     try {
       const result = await MangaService.addNewMangaStatic();
@@ -191,7 +209,10 @@ class MangaController {
     try {
       let mangas = await Manga.getLastPublishedMangas();
       mangas = mangas.map((item) => {
-        return { ...item, cover: LINK + item.cover };
+        return {
+          ...item,
+          cover: LINK + item.cover,
+        };
       });
       reply.code(200).send({ status: "success", data: { mangas } });
     } catch (error) {
@@ -203,7 +224,10 @@ class MangaController {
     try {
       let mangas = await Manga.getMostViewedOnLastWeekMangas();
       mangas = mangas.map((item) => {
-        return { ...item, cover: LINK + item.cover };
+        return {
+          ...item,
+          cover: LINK + item.cover,
+        };
       });
       reply.code(200).send({ status: "success", data: { mangas } });
     } catch (error) {
@@ -215,7 +239,10 @@ class MangaController {
     try {
       let mangas = await Manga.getMostLikedOnLastWeekMangas();
       mangas = mangas.map((item) => {
-        return { ...item, cover: LINK + item.cover };
+        return {
+          ...item,
+          cover: LINK + item.cover,
+        };
       });
       reply.code(200).send({ status: "success", data: { mangas } });
     } catch (error) {
