@@ -16,6 +16,8 @@ async function UserRoutes(fastify, options) {
 
   fastify.get("/api/user", UserService.userProfile);
 
+  fastify.get("/api/role-add-static", UserService.roleSet);
+
   fastify
     .decorate("verifyJwt", async function (request, reply) {
       try {
