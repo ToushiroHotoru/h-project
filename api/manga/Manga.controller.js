@@ -16,7 +16,7 @@ async function MangaRoutes(fastify, options) {
 
   fastify.get("/api/mangas", allMangasSchema, MangaService.getAllMangas);
 
-  fastify.get("/api/manga-canonical-path", MangaService.getMangasId);
+  fastify.get("/api/manga-canonical-paths", MangaService.getMangasId);
 
   fastify.get("/api/manga-static", MangaService.getStatic);
 
