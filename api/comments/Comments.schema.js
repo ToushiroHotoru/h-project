@@ -54,9 +54,9 @@ const getCommentValidation = {
       type: "object",
       minProperties: 1,
       properties: {
-        mangaId: { type: "string" },
+        route: { type: "string" },
       },
-      required: ["mangaId"],
+      required: ["route"],
     },
     response: {
       200: {

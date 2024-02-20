@@ -100,9 +100,9 @@ const readerMangaPagesSchema = {
   schema: {
     query: {
       type: "object",
-      required: ["id"],
+      required: ["route"],
       properties: {
-        id: { type: "string" },
+        route: { type: "string" },
       },
     },
     response: {
@@ -134,7 +134,7 @@ const readerMangaPagesSchema = {
                 properties: {
                   height: { type: "number" },
                   width: { type: "number" },
-                  type: { type: "number" },
+                  type: { type: "string" },
                 },
               },
               image: { type: "string" },
