@@ -56,8 +56,9 @@ class CommentsController {
 
   async getMangaComments(request, reply) {
     try {
-      const { mangaId } = request.query;
-      const comments = await Comments.find({ manga: mangaId })
+      const { route } = request.query;
+      const { _id } = await Manga.findOne({ route: route });
+      const comments = await Comments.find({ manga: _id })
         .select(["_id", "text", "user", "answersFor", "createdAt"])
         .lean();
       const comments2 = await Promise.all(
