@@ -6,11 +6,11 @@ async function UserRoutes(fastify, options) {
 
   fastify.post("/api/login", UserService.loginUser);
 
-  fastify.post("/api/set_preferences_tags", UserService.setPreferencesTags);
+  fastify.post("/api/set-preferences-tags", UserService.setPreferencesTags);
 
-  fastify.post("/api/set_exceptions_tags", UserService.setExceptionsTags);
+  fastify.post("/api/set-exceptions-tags", UserService.setExceptionsTags);
 
-  fastify.post("/api/set_avatar", UserService.setAvatar);
+  fastify.post("/api/set-avatar", UserService.setAvatar);
 
   fastify.get("/api/refresh", UserService.refresh);
 
