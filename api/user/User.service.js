@@ -207,9 +207,9 @@ class UserController {
       userDB = JSON.parse(JSON.stringify(userDB));
 
       if (!userDB) {
-        return reply.code(404).send({
-          status: "error",
+        return reply.code(200).send({
           data: {},
+          status: "error",
           message: "Пользователь с таким никнеймом не найден",
         });
       }
