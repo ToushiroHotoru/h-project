@@ -27,6 +27,7 @@ const tagsSchema = new Schema({
     },
   },
   name: { type: String, required: true, unique: true },
+  nameEn: { type: String, required: true, unique: true },
   description: { type: String, default: "" },
   count: { type: Number, default: 0 },
 });
