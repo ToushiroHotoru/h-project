@@ -4,6 +4,7 @@ const sizeOf = require("image-size");
 const Manga = require("./Manga.model.js");
 const MangaService = require("./Manga.utils.js");
 const LINK = require("../../utils/API_URL.js");
+const TagsModel = require("../tags/Tags.model.js");
 
 class MangaController {
   async getAllMangas(request, reply) {
@@ -25,11 +26,22 @@ class MangaController {
           mangas: [],
         });
       }
+      
+      const tagsIds = await Promise.all(
+        tags.map(async (tagName) => {
+          console.log(tagName);
+          const tag = await TagsModel.findOne({
+            nameEn: tagName.trim(),
+          }).select("_id");
+          return tag._id;
+        })
+      );
+
       const sortedMangas = await MangaService.mangaSort(
         sort,
         offset,
         step,
-        tags
+        tagsIds
       );
 
       const mangas = sortedMangas.mangas.map((item) => {
@@ -56,7 +68,7 @@ class MangaController {
         .code(200)
         .send({ status: "success", data: { total, offset, step, mangas } });
     } catch (error) {
-      reply.code(500).send({ status: "error", errors: error });
+      reply.code(500).send({ status: "error", message: error });
     }
   }
 
@@ -65,7 +77,7 @@ class MangaController {
       const mangas = await Manga.getAllMangasId();
       reply.code(200).send({ status: "success", data: { mangas } });
     } catch (error) {
-      reply.code(500).send({ status: "error", errors: error });
+      reply.code(500).send({ status: "error", message: error });
     }
   }
 
@@ -78,7 +90,7 @@ class MangaController {
         message: `manga by id - '${id}' was deleted`,
       });
     } catch (error) {
-      reply.code(500).send({ status: "error", errors: error });
+      reply.code(500).send({ status: "error", message: error });
     }
   }
 
@@ -89,7 +101,7 @@ class MangaController {
         .code(200)
         .send({ status: "success", message: "all mangas was deleted" });
     } catch (error) {
-      reply.code(500).send({ status: "error", errors: error });
+      reply.code(500).send({ status: "error", message: error });
     }
   }
 
@@ -100,7 +112,7 @@ class MangaController {
       manga = { ...manga, cover: LINK + manga.cover };
       reply.code(200).send({ status: "success", data: { manga } });
     } catch (error) {
-      reply.code(500).send({ status: "error", errors: error });
+      reply.code(500).send({ status: "error", message: error });
     }
   }
 
@@ -124,7 +136,7 @@ class MangaController {
 
       reply.code(200).send({ status: "success", data: { manga } });
     } catch (error) {
-      reply.code(500).send({ status: "error", errors: error });
+      reply.code(500).send({ status: "error", message: error });
     }
   }
 
@@ -150,7 +162,7 @@ class MangaController {
 
       reply.code(200).send({ status: "success", data: { manga } });
     } catch (error) {
-      reply.code(500).send({ status: "error", errors: error });
+      reply.code(500).send({ status: "error", message: error });
     }
   }
 
@@ -161,7 +173,7 @@ class MangaController {
         .code(200)
         .send({ status: "success", message: "72 records created" });
     } catch (error) {
-      reply.code(500).send({ status: "error", errors: error });
+      reply.code(500).send({ status: "error", message: error });
     }
   }
 
@@ -173,7 +185,7 @@ class MangaController {
         message: `manga was written ${result._id}`,
       });
     } catch (error) {
-      reply.code(500).send({ status: "error", errors: error });
+      reply.code(500).send({ status: "error", message: error });
     }
   }
 
@@ -189,7 +201,7 @@ class MangaController {
         });
       });
     } catch (error) {
-      reply.code(500).send({ status: "error", errors: error });
+      reply.code(500).send({ status: "error", message: error });
     }
   }
 
@@ -201,7 +213,7 @@ class MangaController {
         message: `manga was written `,
       });
     } catch (error) {
-      reply.code(500).send({ status: "error", errors: error });
+      reply.code(500).send({ status: "error", message: error });
     }
   }
 
@@ -216,7 +228,7 @@ class MangaController {
       });
       reply.code(200).send({ status: "success", data: { mangas } });
     } catch (error) {
-      reply.code(500).send({ status: "error", errors: error });
+      reply.code(500).send({ status: "error", message: error });
     }
   }
 
@@ -231,7 +243,7 @@ class MangaController {
       });
       reply.code(200).send({ status: "success", data: { mangas } });
     } catch (error) {
-      reply.code(500).send({ status: "error", errors: error });
+      reply.code(500).send({ status: "error", message: error });
     }
   }
 
@@ -246,7 +258,7 @@ class MangaController {
       });
       reply.code(200).send({ status: "success", data: { mangas } });
     } catch (error) {
-      reply.code(500).send({ status: "error", errors: error });
+      reply.code(500).send({ status: "error", message: error });
     }
   }
 }
