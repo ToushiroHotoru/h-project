@@ -87,30 +87,7 @@ class TagsController {
 
   async getAllTags(request, reply) {
     try {
-      let selectedTags = request.query.tags;
       let tags = await Tags.getAll();
-      if (selectedTags) {
-        if (Array.isArray(selectedTags)) {
-          const filteredTagsCount = await Manga.find({
-            tags: { $all: [...selectedTags] },
-          });
-          reply
-            .code(200)
-            .send({ tags: tags, filteredTagsCount: filteredTagsCount });
-        } else {
-          const filteredTagsCount = await Manga.find({ tags: selectedTags });
-          reply
-            .code(200)
-            .send({ tags: tags, filteredTagsCount: filteredTagsCount });
-        }
-      }
-
-      tags.forEach(async (tag) => {
-        let tagsCount = await Manga.find({ tags: tag }).count();
-        await Tags.findByIdAndUpdate(tag._id, { count: tagsCount });
-      });
-
-      tags = await Tags.getAll();
       tags = tags.map((tag) => {
         return {
           ...tag,
