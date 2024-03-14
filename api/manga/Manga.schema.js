@@ -1,243 +1,153 @@
-const { model, Schema } = require("mongoose");
+const errorDTO = require("../../dto/Error.dto");
 
-const MangaSchema = new Schema(
-  {
-    title: { type: String, required: true },
-    cover: { type: String, required: true },
-    artist: { type: String, required: true },
-    series: { type: String },
-    tags: [
-      {
-        type: Schema.Types.ObjectId,
-        ref: "Tags",
-        required: true,
+const allMangasSchema = {
+  schema: {
+    query: {
+      type: "object",
+      properties: {
+        page: { type: "number" },
+        sort: { type: "string" },
+        tags: { type: "string" },
       },
-    ],
-    likes: { type: Number, required: true, default: 0 },
-    views: { type: Number, required: true, default: 0 },
-    cycle: {
-      name: { type: String },
-      part: { type: Number, default: 1 },
+      required: ["page", "sort"],
     },
-    pages: { type: Array, required: true },
+    response: {
+      "2xx": {
+        type: "object",
+        required: ["status", "data"],
+        properties: {
+          status: { type: "string" },
+          data: {
+            type: "object",
+            properties: {
+              total: { type: "number" },
+              offset: { type: "number" },
+              step: { type: "number" },
+              mangas: { type: "array", items: { $refs: "#/$defs/manga" } },
+            },
+          },
+        },
+        $defs: {
+          manga: {
+            type: "object",
+            properties: {
+              _id: { type: "string" },
+              title: { type: "string" },
+              cover: { type: "string" },
+              artist: { type: "string" },
+              series: { type: "string" },
+              likes: { type: "number" },
+              views: { type: "number" },
+              cycle: {
+                type: "object",
+                properties: {
+                  name: { type: "string" },
+                  part: { type: "number" },
+                },
+              },
+              pages: { type: "array", items: { type: "string" } },
+              createdAt: { type: "string" },
+              tags: { type: "array", items: { $ref: "#/$defs/tag" } },
+            },
+          },
+          tag: {
+            type: "object",
+            properties: {
+              _id: { type: "string" },
+              miniImage: { type: "string" },
+              name: { type: "string" },
+            },
+          },
+        },
+      },
+      ...errorDTO,
+    },
   },
-  { timestamps: true }
-);
-
-MangaSchema.statics.add = function (data) {
-  return this.create(data);
 };
 
-MangaSchema.statics.getAllMangasId = function () {
-  return this.find({}).select("_id");
+const homePageMangasSchema = {
+  schema: {
+    response: {
+      "2xx": {
+        type: "object",
+        required: ["status", "data"],
+        properties: {
+          status: { type: "string" },
+          data: {
+            type: "object",
+            properties: {
+              mangas: { type: "array", items: { $refs: "#/$defs/manga" } },
+            },
+          },
+        },
+        $defs: {
+          manga: {
+            type: "object",
+            properties: {
+              _id: { type: "string" },
+              title: { type: "string" },
+              cover: { type: "string" },
+            },
+          },
+        },
+      },
+      ...errorDTO,
+    },
+  },
 };
 
-MangaSchema.statics.sortByTime = async function (offset, step, tags) {
-  if (!tags) {
-    return {
-      mangas: await this.find({})
-        .sort({ createdAt: "desc" })
-        .skip(offset)
-        .limit(step)
-        .populate("tags")
-        .lean()
-        .exec(),
-      total: await this.find({}).count().exec(),
-    };
-  }
-  if (Array.isArray(tags)) {
-    return {
-      mangas: await this.find({ tags: { $all: [...tags] } })
-        .sort({ createdAt: "desc" })
-        .skip(offset)
-        .limit(step)
-        .populate("tags")
-        .lean()
-        .exec(),
-      total: await this.find({ tags: { $all: [...tags] } })
-        .count()
-        .exec(),
-    };
-  }
-  return {
-    mangas: await this.find({ tags: tags })
-      .sort({ createdAt: "desc" })
-      .skip(offset)
-      .limit(step)
-      .populate("tags")
-      .lean()
-      .exec(),
-    total: await this.find({ tags: tags }).count().exec(),
-  };
+const readerMangaPagesSchema = {
+  schema: {
+    query: {
+      type: "object",
+      required: ["route"],
+      properties: {
+        route: { type: "string" },
+      },
+    },
+    response: {
+      "2xx": {
+        type: "object",
+        required: ["status", "data"],
+        properties: {
+          status: { type: "string" },
+          data: {
+            type: "object",
+            properties: {
+              manga: {
+                type: "object",
+                properties: {
+                  _id: { type: "string" },
+                  title: { type: "string" },
+                  pages: { type: "array", items: { $ref: "#/$defs/page" } },
+                },
+              },
+            },
+          },
+        },
+        $defs: {
+          page: {
+            type: "object",
+            properties: {
+              size: {
+                type: "object",
+                properties: {
+                  height: { type: "number" },
+                  width: { type: "number" },
+                  type: { type: "string" },
+                },
+              },
+              image: { type: "string" },
+            },
+          },
+        },
+      },
+    },
+  },
 };
 
-MangaSchema.statics.sortByAlphabet = async function (offset, step, tags) {
-  if (!tags) {
-    return {
-      mangas: await this.find({})
-        .collation({ locale: "en", strength: 2 })
-        .sort({ title: 1 })
-        .skip(offset)
-        .limit(step)
-        .populate("tags")
-        .lean()
-        .exec(),
-      total: await this.find({})
-        .collation({ locale: "en", strength: 2 })
-        .sort({ title: 1 })
-        .count()
-        .exec(),
-    };
-  }
-  if (Array.isArray(tags)) {
-    return {
-      mangas: await this.find({ tags: { $all: [...tags] } })
-        .collation({ locale: "en", strength: 2 })
-        .sort({ title: 1 })
-        .skip(offset)
-        .limit(step)
-        .populate("tags")
-        .lean(),
-      total: await this.find({ tags: { $all: [...tags] } })
-        .collation({ locale: "en", strength: 2 })
-        .sort({ title: 1 })
-        .count()
-        .exec(),
-    };
-  }
-  return {
-    mangas: await this.find({ tags: tags })
-      .collation({ locale: "en", strength: 2 })
-      .sort({ title: 1 })
-      .skip(offset)
-      .limit(step)
-      .populate("tags")
-      .lean(),
-    total: await this.find({ tags: tags })
-      .collation({ locale: "en", strength: 2 })
-      .sort({ title: 1 })
-      .count()
-      .exec(),
-  };
+module.exports = {
+  allMangasSchema,
+  homePageMangasSchema,
+  readerMangaPagesSchema,
 };
-
-MangaSchema.statics.sortByLikes = async function (offset, step, tags) {
-  if (!tags) {
-    return {
-      mangas: await this.find({})
-        .sort({ likes: "desc" })
-        .skip(offset)
-        .limit(step)
-        .populate("tags")
-        .lean()
-        .exec(),
-      total: await this.find({}).count().exec(),
-    };
-  }
-  if (Array.isArray(tags)) {
-    return {
-      mangas: await this.find({ tags: { $all: [...tags] } })
-        .sort({ likes: "desc" })
-        .skip(offset)
-        .limit(step)
-        .populate("tags")
-        .lean()
-        .exec(),
-      total: await this.find({ tags: { $all: [...tags] } })
-        .count()
-        .exec(),
-    };
-  }
-  return {
-    mangas: await this.find({ tags: tags })
-      .sort({ likes: "desc" })
-      .skip(offset)
-      .limit(step)
-      .populate("tags")
-      .lean()
-      .exec(),
-    total: await this.find({ tags: tags }).count().exec(),
-  };
-};
-
-MangaSchema.statics.sortByViews = async function (offset, step, tags) {
-  if (!tags) {
-    return {
-      mangas: await this.find({})
-        .sort({ views: "desc" })
-        .skip(offset)
-        .limit(step)
-        .populate("tags")
-        .lean()
-        .exec(),
-      total: await this.find({}).count().exec(),
-    };
-  }
-  if (Array.isArray(tags)) {
-    return {
-      mangas: await this.find({ tags: { $all: [...tags] } })
-        .sort({ views: "desc" })
-        .skip(offset)
-        .limit(step)
-        .populate("tags")
-        .lean()
-        .exec(),
-      total: await this.find({ tags: { $all: [...tags] } })
-        .count()
-        .exec(),
-    };
-  }
-  return {
-    mangas: await this.find({ tags: tags })
-      .sort({ views: "desc" })
-      .skip(offset)
-      .limit(step)
-      .populate("tags")
-      .lean()
-      .exec(),
-    total: await this.find({ tags: tags }).count().exec(),
-  };
-};
-
-MangaSchema.statics.getStaticFields = function (id) {
-  return this.findById(id)
-    .select(["title", "cover", "artist", "series", "cycle"])
-    .lean();
-};
-
-MangaSchema.statics.getDynamicFields = function (id) {
-  return this.findById(id)
-    .select(["-title", "-cover", "-artist", "-series", "-cycle"])
-    .populate("tags")
-    .lean();
-};
-
-MangaSchema.statics.getMangaPages = function (id) {
-  return this.findById(id).select("title pages").lean();
-};
-
-MangaSchema.statics.getLastPublishedMangas = function () {
-  return this.find({})
-    .sort({ createdAt: "desc" })
-    .select("_id title cover")
-    .limit(8)
-    .lean();
-};
-
-MangaSchema.statics.getMostViewedOnLastWeekMangas = function () {
-  return this.find({ createdAt: { $gte: Date.now() - 604800000 } })
-    .sort({ views: "desc" })
-    .select("_id title cover")
-    .limit(8)
-    .lean();
-};
-
-MangaSchema.statics.getMostLikedOnLastWeekMangas = function () {
-  return this.find({ createdAt: { $gte: Date.now() - 604800000 } })
-    .sort({ likes: "desc" })
-    .select("_id title cover")
-    .limit(8)
-    .lean();
-};
-
-module.exports = model("Manga", MangaSchema);

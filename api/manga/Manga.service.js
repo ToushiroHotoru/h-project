@@ -1,206 +1,266 @@
-const Manga = require("./Manga.schema");
-const mongoose = require("mongoose");
-const fs = require("fs");
-const path = require("path");
+const dayjs = require("dayjs");
+const sizeOf = require("image-size");
 
-const tags = [
-  "63b2c36df0a695aa4ee12d27",
-  "63b2c399f0a695aa4ee12d2a",
-  "63b2c3d6f0a695aa4ee12d2c",
-  "63b2c451f0a695aa4ee12d2e",
-  "63b2c495f0a695aa4ee12d30",
-  "63b2c4c4f0a695aa4ee12d32",
-  "63b2c4f7f0a695aa4ee12d34",
-  "63b2c5a4f0a695aa4ee12d36",
-  "63b2c5d0f0a695aa4ee12d38",
-];
+const Manga = require("./Manga.model.js");
+const MangaService = require("./Manga.utils.js");
+const LINK = require("../../utils/API_URL.js");
+const TagsModel = require("../tags/Tags.model.js");
 
-const getRandomInt = (max) => {
-  return Math.floor(Math.random() * max);
-};
+class MangaController {
+  async getAllMangas(request, reply) {
+    try {
+      const { page, sort } = request.query;
+      const tags = request.query["tags"]
+        ? request.query["tags"].split(",")
+        : [];
+      const reg = new RegExp("^[0-9]+$");
+      const step = 24;
+      const offset = step * (page - 1);
+      const mangaTotal = await Manga.count();
 
-const mangaSort = async (sort, offset, step, tags) => {
-  let mangas = null;
-  switch (sort) {
-    case "latest":
-      mangas = await Manga.sortByTime(offset, step, tags);
-      break;
-    case "alphabet":
-      mangas = await Manga.sortByAlphabet(offset, step, tags);
-      break;
-    case "rating":
-      mangas = await Manga.sortByRating(offset, step, tags);
-      break;
-    case "likes":
-      mangas = await Manga.sortByLikes(offset, step, tags);
-      break;
-    case "views":
-      mangas = await Manga.sortByViews(offset, step, tags);
-      break;
-    default:
-      mangas = { message: "такого типа сортировки нет" };
-      break;
-  }
-
-  return mangas;
-};
-
-const addNewMangaStatic = async () => {
-  for (let i = 0; i < 4; i++) {
-    await Manga.add({
-      title: `Manga ${i + 1}`,
-      cover: `/manga_cover/cover_${getRandomInt(7) + 1}.jpg`,
-      artist: "Toushiro",
-      series: "Toushiro's saga",
-      tags: [
-        mongoose.Types.ObjectId(tags[getRandomInt(9)]),
-        mongoose.Types.ObjectId(tags[getRandomInt(9)]),
-        mongoose.Types.ObjectId(tags[getRandomInt(9)]),
-      ],
-      likes: getRandomInt(1000),
-      views: getRandomInt(10000),
-      cycle: {
-        name: "Neverland",
-        part: 1,
-      },
-      pages: [
-        "/test_manga_storage/1.jpg",
-        "/test_manga_storage/2.jpg",
-        "/test_manga_storage/3.jpg",
-        "/test_manga_storage/4.jpg",
-        "/test_manga_storage/5.jpg",
-        "/test_manga_storage/6.jpg",
-        "/test_manga_storage/7.jpg",
-        "/test_manga_storage/8.jpg",
-        "/test_manga_storage/9.jpg",
-        "/test_manga_storage/10.jpg",
-        "/test_manga_storage/11.jpg",
-        "/test_manga_storage/12.jpg",
-        "/test_manga_storage/13.jpg",
-        "/test_manga_storage/14.jpg",
-        "/test_manga_storage/15.jpg",
-        "/test_manga_storage/16.jpg",
-        "/test_manga_storage/17.jpg",
-        "/test_manga_storage/18.jpg",
-        "/test_manga_storage/19.jpg",
-        "/test_manga_storage/20.jpg",
-        "/test_manga_storage/21.jpg",
-        "/test_manga_storage/22.jpg",
-        "/test_manga_storage/23.jpg",
-        "/test_manga_storage/24.jpg",
-      ],
-    });
-  }
-};
-const mangaAppendService = async () => {
-  for (let i = 0; i < 72; i++) {
-    await Manga.add({
-      title: `Manga ${i + 1}`,
-      cover: `/manga_cover/cover_${getRandomInt(7) + 1}.jpg`,
-      artist: "Toushiro",
-      series: "Toushiro's saga",
-      tags: [
-        mongoose.Types.ObjectId(tags[getRandomInt(9)]),
-        mongoose.Types.ObjectId(tags[getRandomInt(9)]),
-        mongoose.Types.ObjectId(tags[getRandomInt(9)]),
-      ],
-      likes: getRandomInt(1000),
-      views: getRandomInt(10000),
-      cycle: {
-        name: "Neverland",
-        part: 1,
-      },
-      pages: [
-        "/test_manga_storage/1.jpg",
-        "/test_manga_storage/2.jpg",
-        "/test_manga_storage/3.jpg",
-        "/test_manga_storage/4.jpg",
-        "/test_manga_storage/5.jpg",
-        "/test_manga_storage/6.jpg",
-        "/test_manga_storage/7.jpg",
-        "/test_manga_storage/8.jpg",
-        "/test_manga_storage/9.jpg",
-        "/test_manga_storage/10.jpg",
-        "/test_manga_storage/11.jpg",
-        "/test_manga_storage/12.jpg",
-        "/test_manga_storage/13.jpg",
-        "/test_manga_storage/14.jpg",
-        "/test_manga_storage/15.jpg",
-        "/test_manga_storage/16.jpg",
-        "/test_manga_storage/17.jpg",
-        "/test_manga_storage/18.jpg",
-        "/test_manga_storage/19.jpg",
-        "/test_manga_storage/20.jpg",
-        "/test_manga_storage/21.jpg",
-        "/test_manga_storage/22.jpg",
-        "/test_manga_storage/23.jpg",
-        "/test_manga_storage/24.jpg",
-      ],
-    });
-  }
-};
-
-const mangaAppendOneService = async (params) => {
-  if (params) {
-    const pages = [];
-    const mangaRoute = "/upload/mangas";
-    const part = params.part || 1;
-
-    fs.mkdirSync(
-      path.resolve(
-        __dirname,
-        "../upload/mangas",
-        params.title.toLowerCase().replace(/ /gi, "_"),
-        part.toString()
-      ),
-      {
-        recursive: true,
+      if (!reg.test(page) || page - 1 < 0 || page - 1 > mangaTotal / 24) {
+        reply.status(404).send({
+          status: "error",
+          message: "Страница не найдена",
+          total: 0,
+          mangas: [],
+        });
       }
-    );
-    fs.mkdirSync(
-      path.resolve(
-        __dirname,
-        "../upload/covers",
-        params.title.toLowerCase().replace(/ /gi, "_")
-      ),
-      {
-        recursive: true,
-      }
-    );
 
-    for (let i = 0; i <= Number(params.pages); i++) {
-      pages.push(
-        `${mangaRoute}/${params.title
-          .toLowerCase()
-          .replace(/ /gi, "_")}/${part}/${i}.jpg`
+      const tagsIds = await Promise.all(
+        tags.map(async (tagName) => {
+          console.log(tagName);
+          const tag = await TagsModel.findOne({
+            nameEn: tagName.trim(),
+          }).select("_id");
+          return tag._id;
+        })
       );
+
+      const sortedMangas = await MangaService.mangaSort(
+        sort,
+        offset,
+        step,
+        tagsIds
+      );
+
+      const mangas = sortedMangas.mangas.map((item) => {
+        const pages = item.pages.map((page) => {
+          return LINK + page;
+        });
+        const tags = item.tags.map((tag) => {
+          return {
+            ...tag,
+            image: LINK + tag.image,
+            miniImage: LINK + tag.miniImage,
+          };
+        });
+        return {
+          ...item,
+          cover: LINK + item.cover,
+          pages: pages,
+          tags: tags,
+          createdAt: dayjs(item.createdAt).format("DD.MM.YYYY"),
+        };
+      });
+      const total = sortedMangas.total;
+      reply
+        .code(200)
+        .send({ status: "success", data: { total, offset, step, mangas } });
+    } catch (error) {
+      reply.code(500).send({ status: "error", message: error });
     }
-
-    const result = await Manga.add({
-      title: params.title,
-      cover: `/upload/covers/${params.title.toLowerCase()}/${params.title.toLowerCase()}.jpg`,
-      artist: params.artist,
-      series: "",
-      tags: [
-        mongoose.Types.ObjectId(tags[getRandomInt(9)]),
-        mongoose.Types.ObjectId(tags[getRandomInt(9)]),
-        mongoose.Types.ObjectId(tags[getRandomInt(9)]),
-      ],
-      likes: 0,
-      views: 0,
-      cycle: {
-        name: params.cycle,
-        part: part,
-      },
-      pages: pages,
-    });
-    return result;
   }
-};
 
-module.exports = {
-  mangaSort,
-  mangaAppendService,
-  mangaAppendOneService,
-  addNewMangaStatic,
-};
+  async getMangasId(request, reply) {
+    try {
+      const mangas = await Manga.getAllMangasId();
+      reply.code(200).send({ status: "success", data: { mangas } });
+    } catch (error) {
+      reply.code(500).send({ status: "error", message: error });
+    }
+  }
+
+  async deleteMangaById(request, reply) {
+    try {
+      const { id } = request.body;
+      await Manga.deleteOne({ _id: id });
+      reply.code(200).send({
+        status: "success",
+        message: `manga by id - '${id}' was deleted`,
+      });
+    } catch (error) {
+      reply.code(500).send({ status: "error", message: error });
+    }
+  }
+
+  async deleteMangaAll(request, reply) {
+    try {
+      await Manga.deleteMany({});
+      reply
+        .code(200)
+        .send({ status: "success", message: "all mangas was deleted" });
+    } catch (error) {
+      reply.code(500).send({ status: "error", message: error });
+    }
+  }
+
+  async getStatic(request, reply) {
+    try {
+      const { route } = request.query;
+      let manga = await Manga.getStaticFields(route);
+      manga = { ...manga, cover: LINK + manga.cover };
+      reply.code(200).send({ status: "success", data: { manga } });
+    } catch (error) {
+      reply.code(500).send({ status: "error", message: error });
+    }
+  }
+
+  async getMangaPagesForReader(request, reply) {
+    try {
+      const { route } = request.query;
+      let manga = await Manga.getMangaPages(route);
+
+      console.log(manga);
+
+      const pages = manga.pages.map((item) => {
+        return {
+          size: sizeOf(process.cwd() + item),
+          image: LINK + item,
+        };
+      });
+      manga = {
+        ...manga,
+        pages: pages,
+      };
+
+      reply.code(200).send({ status: "success", data: { manga } });
+    } catch (error) {
+      reply.code(500).send({ status: "error", message: error });
+    }
+  }
+
+  async getDynamic(request, reply) {
+    try {
+      const { route } = request.query;
+      let manga = await Manga.getDynamicFields(route);
+      const pages = manga.pages.map((item) => {
+        return LINK + item;
+      });
+      manga = JSON.parse(JSON.stringify(manga));
+      manga = {
+        ...manga,
+        pages: pages,
+        tags: manga.tags.map((tag) => {
+          return {
+            ...tag,
+            image: LINK + tag.image,
+            miniImage: LINK + tag.miniImage,
+          };
+        }),
+      };
+
+      reply.code(200).send({ status: "success", data: { manga } });
+    } catch (error) {
+      reply.code(500).send({ status: "error", message: error });
+    }
+  }
+
+  async mangaAppendMany(request, reply) {
+    try {
+      MangaService.mangaAppendService();
+      reply
+        .code(200)
+        .send({ status: "success", message: "72 records created" });
+    } catch (error) {
+      reply.code(500).send({ status: "error", message: error });
+    }
+  }
+
+  async mangaAppendOne(request, reply) {
+    try {
+      const result = await MangaService.mangaAppendOneService(request.body);
+      reply.code(200).send({
+        status: "success",
+        message: `manga was written ${result._id}`,
+      });
+    } catch (error) {
+      reply.code(500).send({ status: "error", message: error });
+    }
+  }
+
+  async updateRoutes(request, reply) {
+    try {
+      const result = await Manga.find().lean();
+      result.map(async (manga) => {
+        await Manga.findByIdAndUpdate(manga._id, {
+          route: manga.title
+            .toLowerCase()
+            .replace('(.|,|_|{|}|?|/|:|;|[|]|+|=|%|$|#|@|"|\\|<|>)', "-")
+            .replace(" ", "-"),
+        });
+      });
+    } catch (error) {
+      reply.code(500).send({ status: "error", message: error });
+    }
+  }
+
+  async addNewMangasStatic(request, reply) {
+    try {
+      const result = await MangaService.addNewMangaStatic();
+      reply.code(200).send({
+        status: "success",
+        message: `manga was written `,
+      });
+    } catch (error) {
+      reply.code(500).send({ status: "error", message: error });
+    }
+  }
+
+  async lastPublishedMangas(request, reply) {
+    try {
+      let mangas = await Manga.getLastPublishedMangas();
+      mangas = mangas.map((item) => {
+        return {
+          ...item,
+          cover: LINK + item.cover,
+        };
+      });
+      reply.code(200).send({ status: "success", data: { mangas } });
+    } catch (error) {
+      reply.code(500).send({ status: "error", message: error });
+    }
+  }
+
+  async mostViewedOnLastWeekMangas(request, reply) {
+    try {
+      let mangas = await Manga.getMostViewedOnLastWeekMangas();
+      mangas = mangas.map((item) => {
+        return {
+          ...item,
+          cover: LINK + item.cover,
+        };
+      });
+      reply.code(200).send({ status: "success", data: { mangas } });
+    } catch (error) {
+      reply.code(500).send({ status: "error", message: error });
+    }
+  }
+
+  async mostLikedOnLastWeekMangas(request, reply) {
+    try {
+      let mangas = await Manga.getMostLikedOnLastWeekMangas();
+      mangas = mangas.map((item) => {
+        return {
+          ...item,
+          cover: LINK + item.cover,
+        };
+      });
+      reply.code(200).send({ status: "success", data: { mangas } });
+    } catch (error) {
+      reply.code(500).send({ status: "error", message: error });
+    }
+  }
+}
+
+module.exports = new MangaController();

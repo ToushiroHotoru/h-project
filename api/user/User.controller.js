@@ -1,254 +1,55 @@
-const bcrypt = require("bcryptjs");
-
-const User = require("./User.schema");
-const Avatar = require("../avatar/Avatar.schema");
+const UserService = require("./User.service");
 const TokenService = require("../../service/Token.service");
-const LINK = require("../../utils/API_URL");
 
-class UserController {
-  constructor() {
-    this.bcryptSalt = 8;
-  }
-  async registerUser(request, reply) {
-    try {
-      const { email, username, password } = request.body;
-      const candidateWithUsername = await User.findOne({
-        username: username,
-      }).lean();
-      const candidateWithEmail = await User.findOne({ email: email }).lean();
+async function UserRoutes(fastify, options) {
+  fastify.post("/api/registration", UserService.registerUser);
 
-      if (candidateWithUsername) {
-        return reply.code(200).send({
-          status: "warning",
-          message: "Пользователь с таким именем пользователя уже существует",
-        });
-      }
+  fastify.post("/api/login", UserService.loginUser);
 
-      if (candidateWithEmail) {
-        return reply.code(200).send({
-          status: "warning",
-          message: "Пользователь с такой почтой уже существует",
-        });
-      }
+  fastify.post("/api/set-preferences-tags", UserService.setPreferencesTags);
 
-      const passwordHash = bcrypt.hashSync(password, this.bcryptSalt);
+  fastify.post("/api/set-exceptions-tags", UserService.setExceptionsTags);
 
-      await User.register({
-        email,
-        username,
-        password: passwordHash,
-      });
+  fastify.post("/api/set-avatar", UserService.setAvatar);
 
-      reply.code(200).send({
-        status: "success",
-      });
-    } catch (error) {
-      reply.code(500).send({ status: "error", errors: error });
-    }
-  }
+  fastify.get("/api/refresh", UserService.refresh);
 
-  async loginUser(request, reply) {
-    try {
-      const { email, password } = request.body;
-      const user = await User.findOne({ email: email }).lean();
-      if (!user) {
-        return reply.code(404).send({
-          success: false,
-          message: "Пользователь с такой почтой не обнаружен",
-        });
-      }
+  fastify.get("/api/user", UserService.userProfile);
 
-      const compareSync = bcrypt.compareSync(password, user.password);
+  fastify.get("/api/role-add-static", UserService.roleSet);
 
-      if (!compareSync) {
-        return reply.code(404).send({
-          success: false,
-          message: "Неправильный пароль",
-        });
-      }
+  fastify
+    .decorate("verifyJwt", async function (request, reply) {
+      try {
+        const token = request.headers.authorization.split(" ")[1];
 
-      const avatar = await Avatar.findById(user.avatar);
-
-      const payload = {
-        user: user._id,
-        userType: user.userType,
-        userName: user.username,
-      };
-      const tokens = TokenService.generateTokens(payload);
-      await TokenService.saveToken(user._id, tokens.refreshToken, "");
-      reply
-        .setCookie("refreshToken", tokens.refreshToken, {
-          path: "/",
-          httpOnly: true,
-          secure: process.env.NODE_ENV === "production" ? true : false,
-        })
-        .code(200)
-        .send({
-          status: "success",
-          data: {
-            accessToken: tokens.accessToken,
-            refreshToken: tokens.refreshToken,
-            user: {
-              id: user._id,
-              userName: user.username,
-              avatar: LINK + avatar.image,
-            },
-          },
-        });
-    } catch (error) {
-      reply.code(500).send({ status: "error", errors: error });
-    }
-  }
-
-  async logoutUser(request, reply) {
-    try {
-      const refreshToken = request.cookies.refreshToken;
-      const verifiedToken = await TokenService.verifyRefreshToken(refreshToken);
-      await TokenService.removeRefreshToken(verifiedToken.user, refreshToken);
-      reply
-        .clearCookie("refreshToken", {
-          path: "/",
-        })
-        .code(200)
-        .send({ status: "success" });
-    } catch (error) {
-      reply.code(500).send({ status: "error", errors: error });
-    }
-  }
-
-  async refresh(request, reply) {
-    try {
-      const refreshToken = request.cookies.refreshToken;
-      if (!refreshToken) {
-        return reply
-          .code(401)
-          .send({ success: false, message: "Не авторизованы", code: 401 });
-      }
-      const verifiedToken = await TokenService.verifyRefreshToken(refreshToken);
-
-      if (!verifiedToken) {
-        return reply
-          .code(401)
-          .send({ success: false, message: "Invalid refresh" });
-      }
-
-      const userData = await User.findOne({ _id: verifiedToken.user });
-
-      const tokenFromDb = await TokenService.findToken(
-        verifiedToken.user,
-        refreshToken
-      );
-
-      if (!tokenFromDb) {
-        return reply
-          .code(401)
-          .send({ success: false, message: "Token not found" });
-      }
-
-      const tokens = await TokenService.refresh({
-        user: verifiedToken.user,
-        refreshToken: refreshToken,
-        payload: {
-          user: userData._id,
-          userType: userData.userType,
-          userName: userData.username,
-        },
-      });
-
-      reply
-        .setCookie("refreshToken", tokens.refreshToken, {
-          path: "/",
-          httpOnly: true,
-          secure: process.env.NODE_ENV === "production" ? true : false,
-        })
-        .code(200)
-        .send({
-          status: "success",
-          data: {
-            accessToken: tokens.accessToken,
-            user: {
-              id: userData._id,
-              userName: userData.username,
-            },
-          },
-        });
-    } catch (error) {
-      reply.code(401).send({ status: "error", errors: error });
-    }
-  }
-
-  async userProfile(request, reply) {
-    try {
-      const userDB = await User.findOne({ username: request.query.username })
-        .select(["username", "email", "preferencesTags", "exceptionsTags"])
-        .lean();
-
-      if (!userDB) {
-        return reply.code(404).send({
-          message: "Пользователь с таким никнеймом не найден",
-          status: "warning",
-        });
-      }
-
-      reply.code(200).send({ status: "success", data: { user: userDB } });
-    } catch (error) {
-      reply.code(500).send({ status: "error", errors: error });
-    }
-  }
-
-  async getAllUsers(request, reply) {
-    try {
-      const users = await User.allUsers();
-      reply.code(200).send({ status: "success", data: { users } });
-    } catch (error) {
-      reply.code(500).send({ status: "error", errors: error });
-    }
-  }
-
-  async setPreferencesTags(request, reply) {
-    try {
-      const { tags, id } = request.body;
-      if (tags.length) {
-        await User.setPreferencesTags({ tags, id });
-      }
-      reply.code(200).send({ status: "success" });
-    } catch (error) {
-      reply.code(500).send({ status: "error", errors: error });
-    }
-  }
-
-  async setExceptionsTags(request, reply) {
-    try {
-      const { tags, id } = request.body;
-      await User.setExceptionsTags({ tags, id });
-      reply.code(200).send({ status: "success" });
-    } catch (error) {
-      reply.code(500).send({ status: "error", errors: error });
-    }
-  }
-
-  async setAvatar(request, reply) {
-    try {
-      const parts = request.parts();
-      for await (const part of parts) {
-        if (part.type === "file" && part.fields.isUpload.value) {
-          const result = await Avatar.addUserAvatar(part, part.fields.id.value);
-          await User.setAvatar({
-            avatar: result._id.toString(),
-            id: part.fields.id.value,
-          });
-        } else {
-          await User.setAvatar({
-            avatar: part.fields.avatar.value,
-            id: part.fields.id.value,
-          });
+        if (!token) {
+          return reply.code(401).send({ error: "No token was sent" });
         }
+
+        const userData = await TokenService.verifyAccessToken(token);
+
+        request.user = userData;
+      } catch (error) {
+        reply.code(401).send(error);
       }
-      reply.code(200);
-    } catch (error) {
-      reply.code(500).send({ status: "error", errors: error });
-    }
-  }
+    })
+    .register(require("@fastify/auth"))
+    .after(() => {
+      fastify.route({
+        method: "GET",
+        url: "/all-users",
+        preHandler: fastify.auth([fastify.verifyJwt]),
+        handler: UserService.getAllUsers,
+      });
+
+      fastify.route({
+        method: "POST",
+        url: "/logout",
+        preHandler: fastify.auth([fastify.verifyJwt]),
+        handler: UserService.logoutUser,
+      });
+    });
 }
 
-module.exports = new UserController();
+module.exports = UserRoutes;
