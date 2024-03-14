@@ -28,9 +28,6 @@ const mangaSort = async (sort, offset, step, tags) => {
     case "alphabet":
       mangas = await Manga.sortByAlphabet(offset, step, tags);
       break;
-    case "rating":
-      mangas = await Manga.sortByRating(offset, step, tags);
-      break;
     case "likes":
       mangas = await Manga.sortByLikes(offset, step, tags);
       break;
@@ -38,7 +35,7 @@ const mangaSort = async (sort, offset, step, tags) => {
       mangas = await Manga.sortByViews(offset, step, tags);
       break;
     default:
-      mangas = { message: "такого типа сортировки нет" };
+      mangas = await Manga.sortByTime(offset, step, tags);
       break;
   }
 

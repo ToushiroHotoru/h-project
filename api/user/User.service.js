@@ -59,8 +59,8 @@ class UserController {
       const { email, password } = request.body;
       const user = await User.findOne({ email: email }).lean();
       if (!user) {
-        return reply.code(404).send({
-          success: false,
+        return reply.code(200).send({
+          status: "error",
           message: "Пользователь с такой почтой не обнаружен",
         });
       }
@@ -68,8 +68,8 @@ class UserController {
       const compareSync = bcrypt.compareSync(password, user.password);
 
       if (!compareSync) {
-        return reply.code(404).send({
-          success: false,
+        return reply.code(200).send({
+          status: "error",
           message: "Неправильный пароль",
         });
       }
@@ -128,15 +128,15 @@ class UserController {
       const refreshToken = request.cookies.refreshToken;
       if (!refreshToken) {
         return reply
-          .code(401)
-          .send({ success: false, message: "Не авторизованы", code: 401 });
+          .code(403)
+          .send({ status: "error", message: "Не авторизованы" });
       }
       const verifiedToken = await TokenService.verifyRefreshToken(refreshToken);
 
       if (!verifiedToken) {
         return reply
-          .code(401)
-          .send({ success: false, message: "Invalid refresh" });
+          .code(403)
+          .send({ status: "error", message: "Invalid refresh" });
       }
 
       const userData = await User.findOne({ _id: verifiedToken.user });

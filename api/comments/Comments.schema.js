@@ -5,12 +5,11 @@ const addCommentValidation = {
     body: {
       type: "object",
       properties: {
-        userId: { type: "string" },
         mangaId: { type: "string" },
         text: { type: "string" },
         answersFor: { type: "string" },
       },
-      required: ["userId", "mangaId", "text"],
+      required: ["mangaId", "text"],
     },
     response: {
       200: {

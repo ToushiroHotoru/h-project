@@ -1,8 +1,9 @@
 const fastify = require("fastify")({ logger: true });
 const cors = require("@fastify/cors");
 const fastifyStatic = require("@fastify/static");
-// const chalk = require("chalk");
+const chalk = require("chalk");
 const path = require("path");
+const TokenService = require("./service/Token.service.js");
 
 const PORT = process.env.PORT || 8080;
 const HOST = process.env.NODE_ENV === "development" ? "localhost" : "0.0.0.0";
@@ -44,6 +45,10 @@ fastify.register(require("@fastify/cookie"), {
 });
 // *---------Cookie parser------------ *//
 
+// *---------Auth plugin------------ *//
+fastify.register(require("@fastify/auth"));
+// *---------Auth plugin------------ *//
+
 // *---------Formdata parser------------ *//
 fastify.register(require("@fastify/multipart"));
 // *---------Formdata parser------------ *//
@@ -52,18 +57,55 @@ fastify.register(require("@fastify/multipart"));
 fastify.register(require("./plugins/mongoose.js"));
 // *---------Mongo Connect------------ *//
 
-// *---------Auth plugin------------ *//
-fastify.register(require("@fastify/auth"));
-// *---------Auth plugin------------ *//
-
 // *---------Rooutes------------ *//
 fastify.register(require("./routes/routes.js"));
 // *---------Rooutes------------ *//
 
+fastify.addHook("onRequest", async (request, reply) => {
+  try {
+    const refreshToken = request.cookies.refreshToken;
+
+    if (!refreshToken) {
+      request.isAuth = false;
+      request.userId = null;
+      return;
+    }
+
+    const isRefreshTokenValid = await TokenService.verifyRefreshToken(
+      refreshToken
+    );
+
+    // if (isRefreshTokenValid) console.log(isRefreshTokenValid);
+
+    const token = request.headers.authorization
+      ? request.headers.authorization.split(" ")[1]
+      : null;
+
+    if (!token) {
+      request.isAuth = false;
+      request.userId = null;
+      return;
+    }
+
+    const isAccessValid = await TokenService.verifyAccessToken(token);
+
+    if (isAccessValid.error) {
+      request.isAuth = false;
+      request.userId = null;
+      return;
+    }
+    console.log(isAccessValid);
+    request.isAuth = true;
+    request.userId = isAccessValid.user;
+  } catch (error) {
+    console.log(error);
+  }
+});
+
 const start = async () => {
   try {
     await fastify.listen({ port: PORT, host: HOST });
-    // console.log(chalk.blue(`Server started - http://${HOST}:${PORT}`));
+    console.log(chalk.blue(`Server started - http://${HOST}:${PORT}`));
   } catch (err) {
     fastify.log.error(err);
     process.exit(1);

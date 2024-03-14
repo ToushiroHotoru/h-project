@@ -47,19 +47,7 @@ MangaSchema.statics.getDynamicFields = async function (id) {
 };
 
 MangaSchema.statics.sortByTime = async function (offset, step, tags) {
-  if (!tags) {
-    return {
-      mangas: await this.find({})
-        .sort({ createdAt: "desc" })
-        .skip(offset)
-        .limit(step)
-        .populate("tags")
-        .lean()
-        .exec(),
-      total: await this.find({}).count().exec(),
-    };
-  }
-  if (Array.isArray(tags)) {
+  if (Array.isArray(tags) && tags.length) {
     return {
       mangas: await this.find({ tags: { $all: [...tags] } })
         .sort({ createdAt: "desc" })
@@ -73,37 +61,32 @@ MangaSchema.statics.sortByTime = async function (offset, step, tags) {
         .exec(),
     };
   }
+  if (tags.length) {
+    return {
+      mangas: await this.find({ tags: tags })
+        .sort({ createdAt: "desc" })
+        .skip(offset)
+        .limit(step)
+        .populate("tags")
+        .lean()
+        .exec(),
+      total: await this.find({ tags: tags }).count().exec(),
+    };
+  }
   return {
-    mangas: await this.find({ tags: tags })
+    mangas: await this.find({})
       .sort({ createdAt: "desc" })
       .skip(offset)
       .limit(step)
       .populate("tags")
       .lean()
       .exec(),
-    total: await this.find({ tags: tags }).count().exec(),
+    total: await this.find({}).count().exec(),
   };
 };
 
 MangaSchema.statics.sortByAlphabet = async function (offset, step, tags) {
-  if (!tags) {
-    return {
-      mangas: await this.find({})
-        .collation({ locale: "en", strength: 2 })
-        .sort({ title: 1 })
-        .skip(offset)
-        .limit(step)
-        .populate("tags")
-        .lean()
-        .exec(),
-      total: await this.find({})
-        .collation({ locale: "en", strength: 2 })
-        .sort({ title: 1 })
-        .count()
-        .exec(),
-    };
-  }
-  if (Array.isArray(tags)) {
+  if (Array.isArray(tags) && tags.length) {
     return {
       mangas: await this.find({ tags: { $all: [...tags] } })
         .collation({ locale: "en", strength: 2 })
@@ -119,15 +102,33 @@ MangaSchema.statics.sortByAlphabet = async function (offset, step, tags) {
         .exec(),
     };
   }
+  if (tags.length) {
+    return {
+      mangas: await this.find({ tags: tags })
+        .collation({ locale: "en", strength: 2 })
+        .sort({ title: 1 })
+        .skip(offset)
+        .limit(step)
+        .populate("tags")
+        .lean(),
+      total: await this.find({ tags: tags })
+        .collation({ locale: "en", strength: 2 })
+        .sort({ title: 1 })
+        .count()
+        .exec(),
+    };
+  }
+
   return {
-    mangas: await this.find({ tags: tags })
+    mangas: await this.find({})
       .collation({ locale: "en", strength: 2 })
       .sort({ title: 1 })
       .skip(offset)
       .limit(step)
       .populate("tags")
-      .lean(),
-    total: await this.find({ tags: tags })
+      .lean()
+      .exec(),
+    total: await this.find({})
       .collation({ locale: "en", strength: 2 })
       .sort({ title: 1 })
       .count()
@@ -136,19 +137,7 @@ MangaSchema.statics.sortByAlphabet = async function (offset, step, tags) {
 };
 
 MangaSchema.statics.sortByLikes = async function (offset, step, tags) {
-  if (!tags) {
-    return {
-      mangas: await this.find({})
-        .sort({ likes: "desc" })
-        .skip(offset)
-        .limit(step)
-        .populate("tags")
-        .lean()
-        .exec(),
-      total: await this.find({}).count().exec(),
-    };
-  }
-  if (Array.isArray(tags)) {
+  if (Array.isArray(tags) && tags.length) {
     return {
       mangas: await this.find({ tags: { $all: [...tags] } })
         .sort({ likes: "desc" })
@@ -162,32 +151,32 @@ MangaSchema.statics.sortByLikes = async function (offset, step, tags) {
         .exec(),
     };
   }
+  if (tags.length) {
+    return {
+      mangas: await this.find({ tags: tags })
+        .sort({ likes: "desc" })
+        .skip(offset)
+        .limit(step)
+        .populate("tags")
+        .lean()
+        .exec(),
+      total: await this.find({ tags: tags }).count().exec(),
+    };
+  }
   return {
-    mangas: await this.find({ tags: tags })
+    mangas: await this.find({})
       .sort({ likes: "desc" })
       .skip(offset)
       .limit(step)
       .populate("tags")
       .lean()
       .exec(),
-    total: await this.find({ tags: tags }).count().exec(),
+    total: await this.find({}).count().exec(),
   };
 };
 
 MangaSchema.statics.sortByViews = async function (offset, step, tags) {
-  if (!tags) {
-    return {
-      mangas: await this.find({})
-        .sort({ views: "desc" })
-        .skip(offset)
-        .limit(step)
-        .populate("tags")
-        .lean()
-        .exec(),
-      total: await this.find({}).count().exec(),
-    };
-  }
-  if (Array.isArray(tags)) {
+  if (Array.isArray(tags) && tags.length) {
     return {
       mangas: await this.find({ tags: { $all: [...tags] } })
         .sort({ views: "desc" })
@@ -201,15 +190,28 @@ MangaSchema.statics.sortByViews = async function (offset, step, tags) {
         .exec(),
     };
   }
+  if (tags.length) {
+    return {
+      mangas: await this.find({ tags: tags })
+        .sort({ views: "desc" })
+        .skip(offset)
+        .limit(step)
+        .populate("tags")
+        .lean()
+        .exec(),
+      total: await this.find({ tags: tags }).count().exec(),
+    };
+  }
+
   return {
-    mangas: await this.find({ tags: tags })
+    mangas: await this.find({})
       .sort({ views: "desc" })
       .skip(offset)
       .limit(step)
       .populate("tags")
       .lean()
       .exec(),
-    total: await this.find({ tags: tags }).count().exec(),
+    total: await this.find({}).count().exec(),
   };
 };
 

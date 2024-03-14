@@ -9,7 +9,7 @@ class TokenService {
   generateTokens(payload) {
     try {
       const accessToken = jwt.sign(payload, jwtSecret, {
-        expiresIn: "30m",
+        expiresIn: "10s",
       });
       const refreshToken = jwt.sign(payload, jwtSecretRefresh, {
         expiresIn: "90d",
@@ -19,7 +19,7 @@ class TokenService {
         refreshToken,
       };
     } catch (error) {
-      return null;
+      console.log(error);
     }
   }
 
@@ -47,18 +47,25 @@ class TokenService {
       });
       return token;
     } catch (error) {
-      return null;
+      console.log(error);
     }
   }
 
   async verifyAccessToken(token) {
-    const tokenData = jwt.verify(token, jwtSecret);
-    return tokenData;
+    try {
+      const decoded = jwt.verify(token, jwtSecret);
+      return decoded;
+    } catch (error) {
+      return { error: true, errorMessage: error };
+    }
   }
 
   async verifyRefreshToken(token) {
-    const tokenData = jwt.verify(token, jwtSecretRefresh);
-    return tokenData;
+    try {
+      return jwt.verify(token, jwtSecretRefresh);
+    } catch (error) {
+      return { error: true, errorMessage: error };
+    }
   }
 
   async removeRefreshToken(userId, token) {
@@ -71,7 +78,7 @@ class TokenService {
       tokenData.tokens = newTokens;
       await tokenData.save();
     } catch (error) {
-      return null;
+      console.log(error);
     }
   }
 
@@ -84,7 +91,7 @@ class TokenService {
 
       return token;
     } catch (error) {
-      return null;
+      console.log(error);
     }
   }
 
@@ -106,7 +113,7 @@ class TokenService {
         refreshToken: newGeneratedTokens.refreshToken,
       };
     } catch (error) {
-      return null;
+      console.log(error);
     }
   }
 }

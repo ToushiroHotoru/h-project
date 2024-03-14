@@ -12,7 +12,7 @@ class MangaController {
       const { page, sort } = request.query;
       const tags = request.query["tags"]
         ? request.query["tags"].split(",")
-        : "";
+        : [];
       const reg = new RegExp("^[0-9]+$");
       const step = 24;
       const offset = step * (page - 1);
@@ -26,7 +26,7 @@ class MangaController {
           mangas: [],
         });
       }
-      
+
       const tagsIds = await Promise.all(
         tags.map(async (tagName) => {
           console.log(tagName);
