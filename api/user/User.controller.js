@@ -18,6 +18,10 @@ async function UserRoutes(fastify, options) {
 
   fastify.get("/api/role-add-static", UserService.roleSet);
 
+  fastify.get("/api/check-is-online", UserService.checkIsOnline);
+
+  fastify.get("/api/decode-jwt", UserService.decodeJwt);
+
   fastify
     .decorate("verifyJwt", async function (request, reply) {
       try {

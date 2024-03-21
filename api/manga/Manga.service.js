@@ -29,7 +29,6 @@ class MangaController {
 
       const tagsIds = await Promise.all(
         tags.map(async (tagName) => {
-          console.log(tagName);
           const tag = await TagsModel.findOne({
             nameEn: tagName.trim(),
           }).select("_id");
@@ -120,8 +119,6 @@ class MangaController {
     try {
       const { route } = request.query;
       let manga = await Manga.getMangaPages(route);
-
-      console.log(manga);
 
       const pages = manga.pages.map((item) => {
         return {

@@ -41,10 +41,8 @@ class TagsController {
           tags: { $all: [...selectedTags] },
         });
 
-        // console.log("works 1");
 
         if (Array.isArray(selectedTags)) {
-          // console.log("works 2");
           let result = await Promise.all(
             unselectedTags.map(async (item) => {
               let count = await Manga.find({
@@ -53,7 +51,6 @@ class TagsController {
               return { id: item["_id"], name: item["name"], count: count };
             })
           );
-          // console.log(result, "BBBBBBBB");
           return reply
             .code(200)
             .send({ tags: result.filter((item) => item["count"] != 0) });
