@@ -75,7 +75,11 @@ fastify.addHook("onRequest", async (request, reply) => {
       refreshToken
     );
 
-    // if (isRefreshTokenValid) console.log(isRefreshTokenValid);
+    if (isRefreshTokenValid.error) {
+      request.isAuth = false;
+      request.userId = null;
+      return;
+    }
 
     const token = request.headers.authorization
       ? request.headers.authorization.split(" ")[1]
@@ -94,7 +98,6 @@ fastify.addHook("onRequest", async (request, reply) => {
       request.userId = null;
       return;
     }
-    console.log(isAccessValid);
     request.isAuth = true;
     request.userId = isAccessValid.user;
   } catch (error) {

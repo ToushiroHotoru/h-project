@@ -84,6 +84,11 @@ class UserController {
       const tokens = TokenService.generateTokens(payload);
       await TokenService.saveToken(user._id, tokens.refreshToken, "");
       reply
+        .setCookie("accessToken", tokens.accessToken, {
+          path: "/",
+          httpOnly: true,
+          secure: process.env.NODE_ENV === "production" ? true : false,
+        })
         .setCookie("refreshToken", tokens.refreshToken, {
           path: "/",
           httpOnly: true,
@@ -93,11 +98,10 @@ class UserController {
         .send({
           status: "success",
           data: {
-            accessToken: tokens.accessToken,
-            refreshToken: tokens.refreshToken,
             user: {
+              accessToken: tokens.accessToken,
               id: user._id,
-              userName: user.username,
+              name: user.username,
               avatar: LINK + avatar.image,
             },
           },
@@ -133,7 +137,7 @@ class UserController {
       }
       const verifiedToken = await TokenService.verifyRefreshToken(refreshToken);
 
-      if (!verifiedToken) {
+      if (verifiedToken.error) {
         return reply
           .code(403)
           .send({ status: "error", message: "Invalid refresh" });
@@ -162,7 +166,14 @@ class UserController {
         },
       });
 
+      const avatar = await Avatar.findById(userData.avatar);
+
       reply
+        .setCookie("accessToken", tokens.accessToken, {
+          path: "/",
+          httpOnly: true,
+          secure: process.env.NODE_ENV === "production" ? true : false,
+        })
         .setCookie("refreshToken", tokens.refreshToken, {
           path: "/",
           httpOnly: true,
@@ -172,10 +183,11 @@ class UserController {
         .send({
           status: "success",
           data: {
-            accessToken: tokens.accessToken,
             user: {
+              accessToken: tokens.accessToken,
               id: userData._id,
-              userName: userData.username,
+              name: userData.username,
+              avatar: LINK + avatar.image,
             },
           },
         });
@@ -284,6 +296,54 @@ class UserController {
   async roleSet(reply) {
     await RoleModel.addRole();
     reply.code(200);
+  }
+  async checkIsOnline(request, reply) {
+    try {
+      const refreshToken = request.cookies.refreshToken;
+
+      if (!refreshToken) {
+        return reply.code(403).send({ status: "error", message: "Forbidden" });
+      }
+
+      const isRefreshTokenValid = await TokenService.verifyRefreshToken(
+        refreshToken
+      );
+
+      if (isRefreshTokenValid.error) {
+        return reply.code(403).send({ status: "error", message: "Forbidden" });
+      }
+
+      const accessToken = request.headers.authorization
+        ? request.headers.authorization.split(" ")[1]
+        : null;
+
+      if (!accessToken)
+        return reply
+          .code(401)
+          .send({ status: "error", message: "Unauthorized" });
+
+      const isAccessTokenValid = await TokenService.verifyAccessToken(
+        accessToken
+      );
+
+      if (isAccessTokenValid.error) {
+        return reply
+          .code(401)
+          .send({ status: "error", message: "Unauthorized" });
+      }
+
+      reply.code(200).send({ status: "success", message: "user online" });
+    } catch (error) {}
+  }
+
+  async decodeJwt(request, reply) {
+    try {
+      const { token } = request.body;
+      const decodedToken = TokenService.verifyAccessToken(token);
+      reply.code(200).send(decodedToken);
+    } catch (error) {
+      console.log(error);
+    }
   }
 }
 
