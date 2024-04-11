@@ -84,11 +84,6 @@ class UserController {
       const tokens = TokenService.generateTokens(payload);
       await TokenService.saveToken(user._id, tokens.refreshToken, "");
       reply
-        .setCookie("accessToken", tokens.accessToken, {
-          path: "/",
-          httpOnly: true,
-          secure: process.env.NODE_ENV === "production" ? true : false,
-        })
         .setCookie("refreshToken", tokens.refreshToken, {
           path: "/",
           httpOnly: true,
@@ -169,11 +164,6 @@ class UserController {
       const avatar = await Avatar.findById(userData.avatar);
 
       reply
-        .setCookie("accessToken", tokens.accessToken, {
-          path: "/",
-          httpOnly: true,
-          secure: process.env.NODE_ENV === "production" ? true : false,
-        })
         .setCookie("refreshToken", tokens.refreshToken, {
           path: "/",
           httpOnly: true,
