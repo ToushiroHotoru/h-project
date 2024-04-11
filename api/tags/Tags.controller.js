@@ -1,13 +1,13 @@
 const TagsService = require("./Tags.service");
 
 async function TagRoutes(fastify, options) {
-  fastify.get("/api/tags", TagsService.getAllTags);
+  fastify.get("/api/tags/all", TagsService.getAllTags);
 
-  fastify.get("/api/tags-count", TagsService.getTagsCount);
+  fastify.get("/api/tags/count", TagsService.getTagsCount);
 
-  fastify.post("/api/write-tags", TagsService.addTags);
+  fastify.post("/api/tags/add", TagsService.addTags);
 
-  fastify.delete("/api/delete-tags", TagsService.deleteTags);
+  fastify.delete("/api/tags/delete", TagsService.deleteTags);
 }
 
 module.exports = TagRoutes;

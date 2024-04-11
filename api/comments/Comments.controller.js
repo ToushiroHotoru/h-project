@@ -6,12 +6,12 @@ const {
 
 async function CommentsController(fastify, options) {
   fastify.get(
-    "/api/manga-comments",
+    "/api/comments/manga-comments",
     getCommentValidation,
     CommentsService.getMangaComments
   );
   fastify.post(
-    "/api/add-comment-to-manga",
+    "/api/comments/add-comment-to-manga",
     addCommentValidation,
     CommentsService.addComment
   );

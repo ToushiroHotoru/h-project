@@ -2,25 +2,25 @@ const UserService = require("./User.service");
 const TokenService = require("../../service/Token.service");
 
 async function UserRoutes(fastify, options) {
-  fastify.post("/api/registration", UserService.registerUser);
+  fastify.post("/api/user/registration", UserService.registerUser);
 
-  fastify.post("/api/login", UserService.loginUser);
+  fastify.post("/api/user/login", UserService.loginUser);
 
-  fastify.post("/api/set-preferences-tags", UserService.setPreferencesTags);
+  fastify.post("/api/user/set-preferences-tags", UserService.setPreferencesTags);
 
-  fastify.post("/api/set-exceptions-tags", UserService.setExceptionsTags);
+  fastify.post("/api/user/set-exceptions-tags", UserService.setExceptionsTags);
 
-  fastify.post("/api/set-avatar", UserService.setAvatar);
+  fastify.post("/api/user/set-avatar", UserService.setAvatar);
 
-  fastify.get("/api/refresh", UserService.refresh);
+  fastify.get("/api/user/refresh", UserService.refresh);
 
-  fastify.get("/api/user", UserService.userProfile);
+  fastify.get("/api/user/profile", UserService.userProfile);
 
-  fastify.get("/api/role-add-static", UserService.roleSet);
+  fastify.get("/api/user/role-add-static", UserService.roleSet);
 
-  fastify.get("/api/check-is-online", UserService.checkIsOnline);
+  fastify.get("/api/user/check-is-online", UserService.checkIsOnline);
 
-  fastify.get("/api/decode-jwt", UserService.decodeJwt);
+  fastify.get("/api/user/all-users", UserService.getAllUsers);
 
   fastify
     .decorate("verifyJwt", async function (request, reply) {
@@ -40,16 +40,10 @@ async function UserRoutes(fastify, options) {
     })
     .register(require("@fastify/auth"))
     .after(() => {
-      fastify.route({
-        method: "GET",
-        url: "/all-users",
-        preHandler: fastify.auth([fastify.verifyJwt]),
-        handler: UserService.getAllUsers,
-      });
 
       fastify.route({
-        method: "POST",
-        url: "/logout",
+        method: "GET",
+        url: "/api/logout",
         preHandler: fastify.auth([fastify.verifyJwt]),
         handler: UserService.logoutUser,
       });
