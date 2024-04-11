@@ -21,6 +21,7 @@ const MangaSchema = new Schema(
     },
     pages: { type: Array, required: true },
     route: { type: String },
+    coverMini: { type: String },
   },
   { timestamps: true }
 );

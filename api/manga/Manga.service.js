@@ -54,12 +54,14 @@ class MangaController {
             miniImage: LINK + tag.miniImage,
           };
         });
+
         return {
           ...item,
           cover: LINK + item.cover,
           pages: pages,
           tags: tags,
           createdAt: dayjs(item.createdAt).format("DD.MM.YYYY"),
+          coverMini: item.coverMini ? LINK + item.coverMini : LINK + item.cover,
         };
       });
       const total = sortedMangas.total;
