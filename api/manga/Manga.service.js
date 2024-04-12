@@ -111,6 +111,13 @@ class MangaController {
       const { route } = request.query;
       let manga = await Manga.getStaticFields(route);
       manga = { ...manga, cover: LINK + manga.cover };
+      manga.tags = manga.tags.map((tag) => {
+        return {
+          ...tag,
+          image: LINK + tag.image,
+          miniImage: LINK + tag.miniImage,
+        };
+      });
       reply.code(200).send({ status: "success", data: { manga } });
     } catch (error) {
       reply.code(500).send({ status: "error", message: error });
@@ -223,6 +230,7 @@ class MangaController {
         return {
           ...item,
           cover: LINK + item.cover,
+          coverMini: item.coverMini ? LINK + item.coverMini : LINK + item.cover,
         };
       });
       reply.code(200).send({ status: "success", data: { mangas } });
@@ -238,6 +246,7 @@ class MangaController {
         return {
           ...item,
           cover: LINK + item.cover,
+          coverMini: item.coverMini ? LINK + item.coverMini : LINK + item.cover,
         };
       });
       reply.code(200).send({ status: "success", data: { mangas } });
@@ -253,9 +262,34 @@ class MangaController {
         return {
           ...item,
           cover: LINK + item.cover,
+          coverMini: item.coverMini ? LINK + item.coverMini : LINK + item.cover,
         };
       });
       reply.code(200).send({ status: "success", data: { mangas } });
+    } catch (error) {
+      reply.code(500).send({ status: "error", message: error });
+    }
+  }
+  async setLikeToManga(request, reply) {
+    try {
+      const { mangaId } = request.body;
+      const currentLikes = await Manga.findOne({ route: mangaId }).select(
+        "likes"
+      );
+
+      const incrementedLikes = currentLikes.likes + 1;
+      const newLikes = await Manga.findOneAndUpdate(
+        { route: mangaId },
+        { likes: incrementedLikes },
+        {
+          new: true,
+        }
+      ).select("likes");
+
+      reply.code(200).send({
+        status: "success",
+        data: { isLiked: true, currentLikes: newLikes.likes },
+      });
     } catch (error) {
       reply.code(500).send({ status: "error", message: error });
     }
