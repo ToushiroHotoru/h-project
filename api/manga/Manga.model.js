@@ -5,6 +5,7 @@ const MangaSchema = new Schema(
     title: { type: String, required: true },
     cover: { type: String, required: true },
     artist: { type: String, required: true },
+    interpreter: { type: String },
     series: { type: String },
     tags: [
       {
@@ -36,7 +37,18 @@ MangaSchema.statics.getAllMangasId = async function () {
 
 MangaSchema.statics.getStaticFields = async function (id) {
   return await this.findOne({ route: id })
-    .select(["title", "cover", "artist", "series", "cycle", "route"])
+    .select([
+      "title",
+      "cover",
+      "artist",
+      "series",
+      "cycle",
+      "route",
+      "likes",
+      "views",
+      "tags",
+    ])
+    .populate("tags")
     .lean();
 };
 
@@ -223,7 +235,7 @@ MangaSchema.statics.getMangaPages = async function (id) {
 MangaSchema.statics.getLastPublishedMangas = function () {
   return this.find({})
     .sort({ createdAt: "desc" })
-    .select("title cover route")
+    .select("title cover route coverMini")
     .limit(8)
     .lean();
 };
@@ -233,14 +245,14 @@ MangaSchema.statics.getMostViewedOnLastWeekMangas = async function () {
     createdAt: { $gte: Date.now() - 604800000 },
   })
     .sort({ views: "desc" })
-    .select("title cover route")
+    .select("title cover route coverMini")
     .limit(8)
     .lean();
 
   if (!lastViewedOnLastWeek.length) {
     return await this.find()
       .sort({ views: "desc" })
-      .select("title cover route")
+      .select("title cover route coverMini")
       .limit(8)
       .lean();
   }
@@ -253,14 +265,14 @@ MangaSchema.statics.getMostLikedOnLastWeekMangas = async function () {
     createdAt: { $gte: Date.now() - 604800000 },
   })
     .sort({ likes: "desc" })
-    .select("title cover route")
+    .select("title cover route coverMini")
     .limit(8)
     .lean();
 
   if (!lastLikedOnLastWeek.length) {
     return await this.find()
       .sort({ likes: "desc" })
-      .select("title cover route")
+      .select("title cover route coverMini")
       .limit(8)
       .lean();
   }
