@@ -46,6 +46,7 @@ async function MangaRoutes(fastify, options) {
   );
 
   fastify.get("/api/manga/update-mangas", MangaService.updateRoutes);
+  fastify.post("/api/manga/set-like", MangaService.setLikeToManga);
 }
 
 module.exports = MangaRoutes;
